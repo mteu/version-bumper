@@ -1,0 +1,14 @@
+parameters:
+	ignoreErrors:
+		-
+			message: """
+				#^Call to deprecated method getComposer\\(\\) of class Composer\\\\Command\\\\BaseCommand\\:
+				since Composer 2\\.3\\.0 use requireComposer or tryComposer depending on whether you have \\$required set to true or false$#
+			"""
+			count: 1
+			path: src/Command/BumpVersionCommand.php
+
+		-
+			message: "#^Call to function method_exists\\(\\) with \\$this\\(EliasHaeussler\\\\VersionBumper\\\\Command\\\\BumpVersionCommand\\) and 'tryComposer' will always evaluate to true\\.$#"
+			count: 1
+			path: src/Command/BumpVersionCommand.php
