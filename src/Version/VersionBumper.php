@@ -110,7 +110,7 @@ final class VersionBumper
         $result = new Result\VersionBumpResult($file, $operations);
 
         // Don't bump unmodified file contents
-        if ($modified === $contents) {
+        if ($modified === $contents || $file->dryRun()) {
             return $result;
         }
 

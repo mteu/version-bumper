@@ -47,6 +47,15 @@ final class VersionBumperConfig
         return $this->filesToModify;
     }
 
+    public function performDryRun(bool $dryRun = true): self
+    {
+        foreach ($this->filesToModify as $file) {
+            $file->performDryRun($dryRun);
+        }
+
+        return $this;
+    }
+
     public function rootPath(): ?string
     {
         return $this->rootPath;

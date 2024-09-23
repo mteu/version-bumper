@@ -28,7 +28,7 @@ composer require --dev eliashaeussler/version-bumper
 ### Console command `bump-version`
 
 ```bash
-$ composer bump-version <range> [-c|--config CONFIG]
+$ composer bump-version <range> [-c|--config CONFIG] [--dry-run]
 ```
 
 Pass the following options to the console command:
@@ -45,6 +45,8 @@ Pass the following options to the console command:
   defaults to auto-detection in current working directory,
   can be configured in `composer.json` as well (see
   config section below)
+* `--dry-run`: Do not perform any write operations, just
+  calculate and display version bumps
 
 ### PHP API
 

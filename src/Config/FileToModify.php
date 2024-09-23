@@ -53,6 +53,7 @@ final class FileToModify
     public function __construct(
         private readonly string $path,
         array $patterns = [],
+        private bool $dryRun = false,
     ) {
         foreach ($patterns as $pattern) {
             $this->add($pattern);
@@ -91,6 +92,18 @@ final class FileToModify
         }
 
         $this->patterns[] = $this->patternToRegex($pattern);
+
+        return $this;
+    }
+
+    public function dryRun(): bool
+    {
+        return $this->dryRun;
+    }
+
+    public function performDryRun(bool $dryRun = true): self
+    {
+        $this->dryRun = $dryRun;
 
         return $this;
     }

@@ -89,6 +89,12 @@ final class BumpVersionCommand extends Command\BaseCommand
             'Path to configuration file (JSON or YAML) with files in which to bump new versions',
             $this->readConfigFileFromRootPackage(),
         );
+        $this->addOption(
+            'dry-run',
+            null,
+            Console\Input\InputOption::VALUE_NONE,
+            'Do not perform any write operations, just calculate version bumps',
+        );
     }
 
     protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output): void
@@ -101,6 +107,7 @@ final class BumpVersionCommand extends Command\BaseCommand
         $rootPath = (string) getcwd();
         $rangeOrVersion = $input->getArgument('range');
         $configFile = $input->getOption('config') ?? $this->configReader->detectFile($rootPath);
+        $dryRun = $input->getOption('dry-run');
 
         if (null === $configFile) {
             $this->io->error('Please provide a config file path using the --config option.');
@@ -116,6 +123,8 @@ final class BumpVersionCommand extends Command\BaseCommand
 
         try {
             $config = $this->configReader->readFromFile($configFile);
+            $config->performDryRun($dryRun);
+
             $versionRange = Enum\VersionRange::tryFromInput($rangeOrVersion);
             $results = $this->bumper->bump(
                 $config->filesToModify(),
@@ -133,6 +142,10 @@ final class BumpVersionCommand extends Command\BaseCommand
         }
 
         $this->decorateResults($results, $rootPath);
+
+        if ($dryRun) {
+            $this->io->note('No write operations were performed (dry-run mode).');
+        }
 
         return self::SUCCESS;
     }
