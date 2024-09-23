@@ -139,6 +139,8 @@ rootPath: ../
   - `patterns`: List of version patterns to be searched and replaced
     in the configured file. Each pattern must contain a
     `{%version%}` placeholder that is replaced by the new version.
+    Patterns are internally converted to regular expressions, so
+    feel free to use regex syntax such as `\s+`.
 * `rootPath` (optional): Relative or absolute path to project root.
   This path will be used to calculate paths to configured files if
   they are configured as relative paths. If the root path is configured
