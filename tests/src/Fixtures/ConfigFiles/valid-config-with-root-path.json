@@ -1,0 +1,17 @@
+{
+	"filesToModify": [
+		{
+			"path": "foo",
+			"patterns": [
+				"baz: {%version%}"
+			]
+		},
+		{
+			"path": "baz",
+			"patterns": [
+				"foo: {%version%}"
+			]
+		}
+	],
+	"rootPath": "../RootPath"
+}

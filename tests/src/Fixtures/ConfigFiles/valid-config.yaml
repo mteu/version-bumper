@@ -1,0 +1,5 @@
+filesToModify:
+  - path: foo
+    patterns:
+      - 'baz: {%version%}'
+rootPath: ..
