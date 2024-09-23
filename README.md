@@ -50,7 +50,7 @@ Pass the following options to the console command:
 
 ### PHP API
 
-This main entrypoint of the plugin is the
+The main entrypoint of the plugin is the
 [`Version\VersionBumper`](src/Version/VersionBumper.php) class.
 
 ```php
@@ -134,8 +134,8 @@ rootPath: ../
 
 * `filesToModify` (required): List of files that contain versions which
   are to be bumped. Each item must contain the following properties:
-  - `path`: Relative of absolute path to the file. Relative paths
-    are calculated from the configured (or calculated) project root
+  - `path`: Relative or absolute path to the file. Relative paths
+    are calculated from the configured (or calculated) project root.
   - `patterns`: List of version patterns to be searched and replaced
     in the configured file. Each pattern must contain a
     `{%version%}` placeholder that is replaced by the new version.
