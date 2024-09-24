@@ -146,6 +146,9 @@ rootPath: ../
   they are configured as relative paths. If the root path is configured
   as relative path, it is calculated based on the config file path.
 
+> [!TIP]
+> Have a look at the shipped [JSON schema](res/version-bumper.schema.json).
+
 ### Configuration in `composer.json`
 
 The config file path can be passed as `-c`/`--config` command

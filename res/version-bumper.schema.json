@@ -1,0 +1,50 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "object",
+	"title": "Version Bumper config file schema",
+	"properties": {
+		"filesToModify": {
+			"type": "array",
+			"title": "List of files that contain versions which are to be bumped",
+			"items": {
+				"$ref": "#/definitions/fileToModify"
+			}
+		},
+		"rootPath": {
+			"type": "string",
+			"title": "Relative or absolute path to project root",
+			"description": "This path will be used to calculate paths to configured files if they are configured as relative paths. If the root path is configured as relative path, it is calculated based on the config file path."
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"filesToModify"
+	],
+	"definitions": {
+		"fileToModify": {
+			"type": "object",
+			"title": "A file that contains versions which are to be bumped",
+			"properties": {
+				"path": {
+					"type": "string",
+					"title": "Relative or absolute path to the file",
+					"description": "Relative paths are calculated from the configured (or calculated) project root."
+				},
+				"patterns": {
+					"type": "array",
+					"title": "List of version patterns to be searched and replaced in the configured file",
+					"description": "Each pattern must contain a `{%version%}` placeholder that is replaced by the new version. Patterns are internally converted to regular expressions, so feel free to use regex syntax such as `\\s+`.",
+					"items": {
+						"type": "string",
+						"pattern": "\\{%version%\\}"
+					}
+				}
+			},
+			"additionalProperties": false,
+			"required": [
+				"path",
+				"patterns"
+			]
+		}
+	}
+}
