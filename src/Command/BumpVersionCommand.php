@@ -95,6 +95,12 @@ final class BumpVersionCommand extends Command\BaseCommand
             Console\Input\InputOption::VALUE_NONE,
             'Do not perform any write operations, just calculate version bumps',
         );
+        $this->addOption(
+            'strict',
+            null,
+            Console\Input\InputOption::VALUE_NONE,
+            'Fail if any unmatched file pattern is reported',
+        );
     }
 
     protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output): void
@@ -108,6 +114,7 @@ final class BumpVersionCommand extends Command\BaseCommand
         $rangeOrVersion = $input->getArgument('range');
         $configFile = $input->getOption('config') ?? $this->configReader->detectFile($rootPath);
         $dryRun = $input->getOption('dry-run');
+        $strict = $input->getOption('strict');
 
         if (null === $configFile) {
             $this->io->error('Please provide a config file path using the --config option.');
@@ -145,6 +152,14 @@ final class BumpVersionCommand extends Command\BaseCommand
 
         if ($dryRun) {
             $this->io->note('No write operations were performed (dry-run mode).');
+        }
+
+        if ($strict) {
+            foreach ($results as $result) {
+                if ($result->hasUnmatchedReports()) {
+                    return self::FAILURE;
+                }
+            }
         }
 
         return self::SUCCESS;

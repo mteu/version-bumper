@@ -28,7 +28,7 @@ composer require --dev eliashaeussler/version-bumper
 ### Console command `bump-version`
 
 ```bash
-$ composer bump-version <range> [-c|--config CONFIG] [--dry-run]
+$ composer bump-version <range> [-c|--config CONFIG] [--dry-run] [--strict]
 ```
 
 Pass the following options to the console command:
@@ -44,9 +44,10 @@ Pass the following options to the console command:
 * `-c`/`--config`: Path to [config file](#-configuration),
   defaults to auto-detection in current working directory,
   can be configured in `composer.json` as well (see
-  config section below)
+  config section below).
 * `--dry-run`: Do not perform any write operations, just
-  calculate and display version bumps
+  calculate and display version bumps.
+* `--strict`: Fail if any unmatched file pattern is reported.
 
 ### PHP API
 
@@ -138,12 +139,13 @@ rootPath: ../
   - `path` (required): Relative or absolute path to the file. Relative
     paths are calculated from the configured (or calculated) project root.
   - `patterns` (required): List of version patterns to be searched and
-  - replaced in the configured file. Each pattern must contain a
+    replaced in the configured file. Each pattern must contain a
     `{%version%}` placeholder that is replaced by the new version.
     Patterns are internally converted to regular expressions, so
     feel free to use regex syntax such as `\s+`.
   - `reportUnmatched` (optional): Show warning if a configured pattern
-    does not match file contents.
+    does not match file contents. Useful in combination with the
+    `--strict` command option.
 * `rootPath` (optional): Relative or absolute path to project root.
   This path will be used to calculate paths to configured files if
   they are configured as relative paths. If the root path is configured
