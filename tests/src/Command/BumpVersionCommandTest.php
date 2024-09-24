@@ -178,6 +178,25 @@ final class BumpVersionCommandTest extends Framework\TestCase
         self::assertStringContainsString('No write operations were performed (dry-run mode).', $output);
     }
 
+    #[Framework\Attributes\Test]
+    public function executeFailsIfUnmatchedPatternIsReportedInStrictMode(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';
+
+        $this->commandTester->execute([
+            'range' => '1.0.0',
+            '--config' => $configFile,
+            '--dry-run' => true,
+            '--strict' => true,
+        ]);
+
+        $output = $this->commandTester->getDisplay();
+
+        self::assertSame(Console\Command\Command::FAILURE, $this->commandTester->getStatusCode());
+        self::assertStringContainsString('Unmatched file pattern: foo: {%version%}', $output);
+        self::assertStringContainsString('Bumped version from "2.0.0" to "1.0.0"', $output);
+    }
+
     private function createCommandTester(?Composer $composer = null): Console\Tester\CommandTester
     {
         $application = new Application();
