@@ -23,7 +23,9 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Result;
 
+use EliasHaeussler\VersionBumper\Config;
 use EliasHaeussler\VersionBumper\Enum;
+use EliasHaeussler\VersionBumper\Exception;
 use EliasHaeussler\VersionBumper\Version;
 
 /**
@@ -34,30 +36,80 @@ use EliasHaeussler\VersionBumper\Version;
  */
 final class WriteOperation
 {
+    /**
+     * @throws Exception\SourceVersionIsMissing
+     * @throws Exception\TargetVersionIsMissing
+     * @throws Exception\VersionBumpResultIsMissing
+     */
     public function __construct(
-        private readonly Version\Version $source,
-        private readonly Version\Version $target,
-        private readonly string $result,
+        private readonly ?Version\Version $source,
+        private readonly ?Version\Version $target,
+        private readonly ?string $result,
+        private readonly Config\FilePattern $pattern,
         private readonly Enum\OperationState $state,
-    ) {}
+    ) {
+        $this->validate();
+    }
 
-    public function source(): Version\Version
+    public static function unmatched(Config\FilePattern $pattern): self
+    {
+        return new self(null, null, null, $pattern, Enum\OperationState::Unmatched);
+    }
+
+    public function source(): ?Version\Version
     {
         return $this->source;
     }
 
-    public function target(): Version\Version
+    public function target(): ?Version\Version
     {
         return $this->target;
     }
 
-    public function result(): string
+    public function result(): ?string
     {
         return $this->result;
+    }
+
+    public function pattern(): Config\FilePattern
+    {
+        return $this->pattern;
+    }
+
+    /**
+     * @phpstan-assert-if-true !null $this->source()
+     * @phpstan-assert-if-true !null $this->target()
+     * @phpstan-assert-if-true !null $this->result()
+     */
+    public function matched(): bool
+    {
+        return Enum\OperationState::Unmatched !== $this->state;
     }
 
     public function state(): Enum\OperationState
     {
         return $this->state;
+    }
+
+    /**
+     * @throws Exception\SourceVersionIsMissing
+     * @throws Exception\TargetVersionIsMissing
+     * @throws Exception\VersionBumpResultIsMissing
+     */
+    private function validate(): void
+    {
+        if (Enum\OperationState::Unmatched === $this->state) {
+            return;
+        }
+
+        if (null === $this->source) {
+            throw new Exception\SourceVersionIsMissing();
+        }
+        if (null === $this->target) {
+            throw new Exception\TargetVersionIsMissing();
+        }
+        if (null === $this->result) {
+            throw new Exception\VersionBumpResultIsMissing();
+        }
     }
 }

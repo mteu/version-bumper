@@ -26,8 +26,7 @@ namespace EliasHaeussler\VersionBumper\Config;
 use EliasHaeussler\VersionBumper\Exception;
 use Symfony\Component\Filesystem;
 
-use function addcslashes;
-use function str_replace;
+use function is_string;
 
 /**
  * FileToModify.
@@ -37,22 +36,20 @@ use function str_replace;
  */
 final class FileToModify
 {
-    private const VERSION_PLACEHOLDER = '{%version%}';
-    private const VERSION_REGEX = '(?P<version>\\d+\\.\\d+\\.\\d+)';
-
     /**
-     * @var list<string>
+     * @var list<FilePattern>
      */
     private array $patterns = [];
 
     /**
-     * @param list<string> $patterns
+     * @param list<string|FilePattern> $patterns
      *
      * @throws Exception\FilePatternIsInvalid
      */
     public function __construct(
         private readonly string $path,
         array $patterns = [],
+        private readonly bool $reportUnmatched = false,
         private bool $dryRun = false,
     ) {
         foreach ($patterns as $pattern) {
@@ -75,7 +72,7 @@ final class FileToModify
     }
 
     /**
-     * @return list<string>
+     * @return list<FilePattern>
      */
     public function patterns(): array
     {
@@ -85,15 +82,20 @@ final class FileToModify
     /**
      * @throws Exception\FilePatternIsInvalid
      */
-    public function add(string $pattern): self
+    public function add(string|FilePattern $pattern): self
     {
-        if (!str_contains($pattern, self::VERSION_PLACEHOLDER)) {
-            throw new Exception\FilePatternIsInvalid($pattern);
+        if (is_string($pattern)) {
+            $pattern = new FilePattern($pattern);
         }
 
-        $this->patterns[] = $this->patternToRegex($pattern);
+        $this->patterns[] = $pattern;
 
         return $this;
+    }
+
+    public function reportUnmatched(): bool
+    {
+        return $this->reportUnmatched;
     }
 
     public function dryRun(): bool
@@ -106,10 +108,5 @@ final class FileToModify
         $this->dryRun = $dryRun;
 
         return $this;
-    }
-
-    private function patternToRegex(string $pattern): string
-    {
-        return '/'.str_replace(self::VERSION_PLACEHOLDER, self::VERSION_REGEX, addcslashes($pattern, '/')).'/';
     }
 }

@@ -21,17 +21,26 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Enum;
+namespace EliasHaeussler\VersionBumper\Tests\Exception;
+
+use EliasHaeussler\VersionBumper as Src;
+use PHPUnit\Framework;
 
 /**
- * OperationState.
+ * SourceVersionIsMissingTest.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-enum OperationState
+#[Framework\Attributes\CoversClass(Src\Exception\SourceVersionIsMissing::class)]
+final class SourceVersionIsMissingTest extends Framework\TestCase
 {
-    case Modified;
-    case Skipped;
-    case Unmatched;
+    #[Framework\Attributes\Test]
+    public function constructorCreatesExceptionForMissingSourceVersion(): void
+    {
+        $actual = new Src\Exception\SourceVersionIsMissing();
+
+        self::assertSame('No source version given.', $actual->getMessage());
+        self::assertSame(1727170609, $actual->getCode());
+    }
 }

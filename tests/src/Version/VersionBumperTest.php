@@ -93,6 +93,7 @@ baz: 1.0.0
 baz: 1.0.0
 
 FOO,
+                new Src\Config\FilePattern('baz: {%version%}'),
                 Src\Enum\OperationState::Skipped,
             ),
             new Src\Result\WriteOperation(
@@ -103,6 +104,56 @@ baz: 1.0.0
 baz: 1.0.0
 
 FOO,
+                new Src\Config\FilePattern('baz: {%version%}'),
+                Src\Enum\OperationState::Skipped,
+            ),
+        ];
+
+        $actual = $this->subject->bump($files, $rootPath, '1.0.0');
+
+        self::assertCount(1, $actual);
+        self::assertSame($fooFile, $actual[0]->file());
+        self::assertEquals($expected, $actual[0]->operations());
+    }
+
+    #[Framework\Attributes\Test]
+    public function bumpReportsUnmatchedPattern(): void
+    {
+        $fooFile = new Src\Config\FileToModify(
+            'foo',
+            [
+                'foo: {%version%}',
+                'baz: {%version%}',
+            ],
+            true,
+        );
+        $files = [$fooFile];
+        $rootPath = dirname(__DIR__).'/Fixtures/RootPath';
+
+        $expected = [
+            Src\Result\WriteOperation::unmatched(
+                new Src\Config\FilePattern('foo: {%version%}'),
+            ),
+            new Src\Result\WriteOperation(
+                new Src\Version\Version(1, 0, 0),
+                new Src\Version\Version(1, 0, 0),
+                <<<FOO
+baz: 1.0.0
+baz: 1.0.0
+
+FOO,
+                new Src\Config\FilePattern('baz: {%version%}'),
+                Src\Enum\OperationState::Skipped,
+            ),
+            new Src\Result\WriteOperation(
+                new Src\Version\Version(1, 0, 0),
+                new Src\Version\Version(1, 0, 0),
+                <<<FOO
+baz: 1.0.0
+baz: 1.0.0
+
+FOO,
+                new Src\Config\FilePattern('baz: {%version%}'),
                 Src\Enum\OperationState::Skipped,
             ),
         ];
@@ -132,6 +183,7 @@ baz: 1.1.0
 baz: 1.0.0
 
 FOO,
+                new Src\Config\FilePattern('baz: {%version%}'),
                 Src\Enum\OperationState::Modified,
             ),
             new Src\Result\WriteOperation(
@@ -142,6 +194,7 @@ baz: 1.1.0
 baz: 1.1.0
 
 FOO,
+                new Src\Config\FilePattern('baz: {%version%}'),
                 Src\Enum\OperationState::Modified,
             ),
         ];
@@ -172,6 +225,7 @@ foo: 2.1.0
 baz: 3.0.0
 
 BAZ,
+                new Src\Config\FilePattern('foo: {%version%}'),
                 Src\Enum\OperationState::Modified,
             ),
             new Src\Result\WriteOperation(
@@ -182,6 +236,7 @@ foo: 2.1.0
 baz: 3.1.0
 
 BAZ,
+                new Src\Config\FilePattern('baz: {%version%}'),
                 Src\Enum\OperationState::Modified,
             ),
         ];

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Result;
 
 use EliasHaeussler\VersionBumper\Config;
+use EliasHaeussler\VersionBumper\Enum;
 
 use function array_values;
 use function sprintf;
@@ -57,6 +58,11 @@ final class VersionBumpResult
         return $this->operations;
     }
 
+    public function hasOperations(): bool
+    {
+        return [] !== $this->operations;
+    }
+
     /**
      * @return list<non-empty-list<WriteOperation>>
      */
@@ -66,10 +72,11 @@ final class VersionBumpResult
 
         foreach ($this->operations as $operation) {
             $identifier = sprintf(
-                '%s_%s_%s',
-                $operation->source()->full(),
-                $operation->target()->full(),
+                '%s_%s_%s_%s',
+                $operation->source()?->full(),
+                $operation->target()?->full(),
                 $operation->state()->name,
+                Enum\OperationState::Unmatched === $operation->state() ? $operation->pattern()->original() : '',
             );
 
             if (!isset($operations[$identifier])) {
@@ -80,5 +87,16 @@ final class VersionBumpResult
         }
 
         return array_values($operations);
+    }
+
+    public function hasUnmatchedReports(): bool
+    {
+        foreach ($this->operations as $operation) {
+            if (Enum\OperationState::Unmatched === $operation->state()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

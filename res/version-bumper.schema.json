@@ -38,6 +38,10 @@
 						"type": "string",
 						"pattern": "\\{%version%\\}"
 					}
+				},
+				"reportUnmatched": {
+					"type": "boolean",
+					"title": "Show warning if a configured pattern does not match file contents"
 				}
 			},
 			"additionalProperties": false,
