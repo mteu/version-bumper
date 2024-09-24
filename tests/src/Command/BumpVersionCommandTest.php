@@ -176,6 +176,7 @@ final class BumpVersionCommandTest extends Framework\TestCase
         self::assertStringContainsString('Unmatched file pattern: foo: {%version%}', $output);
         self::assertStringContainsString('Skipped file due to unmodified contents', $output);
         self::assertStringContainsString('No write operations were performed (dry-run mode).', $output);
+        self::assertStringNotContainsString('foobaz', $output);
     }
 
     #[Framework\Attributes\Test]
