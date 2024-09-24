@@ -170,10 +170,11 @@ final class BumpVersionCommand extends Command\BaseCommand
                 $message = match ($operation->state()) {
                     Enum\OperationState::Modified => sprintf(
                         '✅ Bumped version from "%s" to "%s"',
-                        $operation->source()->full(),
-                        $operation->target()->full(),
+                        $operation->source()?->full(),
+                        $operation->target()?->full(),
                     ),
                     Enum\OperationState::Skipped => '⏩ Skipped file due to unmodified contents',
+                    Enum\OperationState::Unmatched => '❓ Unmatched file pattern: '.$operation->pattern()->original(),
                 };
 
                 if ($numberOfOperations > 1) {

@@ -50,6 +50,9 @@ final class VersionBumper
      * @throws Exception\FileCouldNotBeModified
      * @throws Exception\FileDoesNotExist
      * @throws Exception\FileIsNotReadable
+     * @throws Exception\SourceVersionIsMissing
+     * @throws Exception\TargetVersionIsMissing
+     * @throws Exception\VersionBumpResultIsMissing
      * @throws Exception\VersionIsNotSupported
      */
     public function bump(
@@ -70,6 +73,9 @@ final class VersionBumper
      * @throws Exception\FileCouldNotBeModified
      * @throws Exception\FileDoesNotExist
      * @throws Exception\FileIsNotReadable
+     * @throws Exception\SourceVersionIsMissing
+     * @throws Exception\TargetVersionIsMissing
+     * @throws Exception\VersionBumpResultIsMissing
      * @throws Exception\VersionIsNotSupported
      */
     private function bumpVersionsInFile(
@@ -93,17 +99,23 @@ final class VersionBumper
         $operations = [];
 
         foreach ($file->patterns() as $pattern) {
-            if (preg_match_all($pattern, $contents, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
+            if (preg_match_all($pattern->regularExpression(), $contents, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
                 foreach ($matches as ['version' => [$fullVersion, $offset]]) {
                     $operation = $this->buildWriteOperation(
                         Version::fromFullVersion($fullVersion),
                         $versionRange,
                         $modified,
                         $offset,
+                        $pattern,
                     );
-                    $modified = $operation->result();
                     $operations[] = $operation;
+
+                    if ($operation->matched()) {
+                        $modified = $operation->result();
+                    }
                 }
+            } elseif ($file->reportUnmatched()) {
+                $operations[] = Result\WriteOperation::unmatched($pattern);
             }
         }
 
@@ -122,6 +134,9 @@ final class VersionBumper
     }
 
     /**
+     * @throws Exception\SourceVersionIsMissing
+     * @throws Exception\TargetVersionIsMissing
+     * @throws Exception\VersionBumpResultIsMissing
      * @throws Exception\VersionIsNotSupported
      */
     private function buildWriteOperation(
@@ -129,6 +144,7 @@ final class VersionBumper
         Enum\VersionRange|string $versionRange,
         string $contents,
         int $offset,
+        Config\FilePattern $pattern,
     ): Result\WriteOperation {
         if ($versionRange instanceof Enum\VersionRange) {
             $newVersion = $currentVersion->increase($versionRange);
@@ -145,6 +161,6 @@ final class VersionBumper
             $state = Enum\OperationState::Skipped;
         }
 
-        return new Result\WriteOperation($currentVersion, $newVersion, $modified, $state);
+        return new Result\WriteOperation($currentVersion, $newVersion, $modified, $pattern, $state);
     }
 }

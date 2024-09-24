@@ -70,26 +70,24 @@ final class FileToModifyTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
-    public function addThrowsExceptionIfVersionPlaceholderIsMissing(): void
+    public function addAcceptsFilePatternString(): void
     {
-        $this->expectExceptionObject(
-            new Src\Exception\FilePatternIsInvalid('foo'),
-        );
+        $this->subject->add('foo/foo: {%version%}');
 
-        $this->subject->add('foo');
+        $expected = new Src\Config\FilePattern('foo/foo: {%version%}');
+
+        self::assertCount(1, $this->subject->patterns());
+        self::assertEquals($expected, $this->subject->patterns()[0]);
     }
 
     #[Framework\Attributes\Test]
-    public function addConvertsPatternsToRegularExpressions(): void
+    public function addAcceptsFilePatternObject(): void
     {
-        $this->subject->add('foo/foo: {%version%}');
-        $this->subject->add('baz/baz: {%version%}');
+        $pattern = new Src\Config\FilePattern('foo/foo: {%version%}');
 
-        $expected = [
-            '/foo\/foo: (?P<version>\d+\.\d+\.\d+)/',
-            '/baz\/baz: (?P<version>\d+\.\d+\.\d+)/',
-        ];
+        $this->subject->add($pattern);
 
-        self::assertSame($expected, $this->subject->patterns());
+        self::assertCount(1, $this->subject->patterns());
+        self::assertSame($pattern, $this->subject->patterns()[0]);
     }
 }

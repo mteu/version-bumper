@@ -21,17 +21,18 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Enum;
+namespace EliasHaeussler\VersionBumper\Exception;
 
 /**
- * OperationState.
+ * SourceVersionIsMissing.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-enum OperationState
+final class SourceVersionIsMissing extends Exception
 {
-    case Modified;
-    case Skipped;
-    case Unmatched;
+    public function __construct()
+    {
+        parent::__construct('No source version given.', 1727170609);
+    }
 }

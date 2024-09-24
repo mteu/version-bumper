@@ -173,6 +173,7 @@ final class BumpVersionCommandTest extends Framework\TestCase
 
         self::assertSame(Console\Command\Command::SUCCESS, $this->commandTester->getStatusCode());
         self::assertStringContainsString('Bumped version from "1.0.0" to "2.0.0" (2x)', $output);
+        self::assertStringContainsString('Unmatched file pattern: foo: {%version%}', $output);
         self::assertStringContainsString('Skipped file due to unmodified contents', $output);
         self::assertStringContainsString('No write operations were performed (dry-run mode).', $output);
     }

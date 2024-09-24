@@ -52,6 +52,7 @@ final class VersionBumpResultTest extends Framework\TestCase
                     new Src\Version\Version(2, 0, 0),
                     '"name": "foo/baz",
         "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
                     Src\Enum\OperationState::Modified,
                 ),
                 new Src\Result\WriteOperation(
@@ -59,6 +60,7 @@ final class VersionBumpResultTest extends Framework\TestCase
                     new Src\Version\Version(2, 0, 0),
                     '"name": "foo/baz",
     "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
                     Src\Enum\OperationState::Modified,
                 ),
                 new Src\Result\WriteOperation(
@@ -66,7 +68,14 @@ final class VersionBumpResultTest extends Framework\TestCase
                     new Src\Version\Version(2, 0, 0),
                     '"name": "foo/baz",
     "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
                     Src\Enum\OperationState::Modified,
+                ),
+                Src\Result\WriteOperation::unmatched(
+                    new Src\Config\FilePattern('"foo/version": "{%version%}"'),
+                ),
+                Src\Result\WriteOperation::unmatched(
+                    new Src\Config\FilePattern('"baz/version": "{%version%}"'),
                 ),
             ],
         );
@@ -83,6 +92,7 @@ final class VersionBumpResultTest extends Framework\TestCase
                     new Src\Version\Version(2, 0, 0),
                     '"name": "foo/baz",
         "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
                     Src\Enum\OperationState::Modified,
                 ),
                 new Src\Result\WriteOperation(
@@ -90,6 +100,7 @@ final class VersionBumpResultTest extends Framework\TestCase
                     new Src\Version\Version(2, 0, 0),
                     '"name": "foo/baz",
     "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
                     Src\Enum\OperationState::Modified,
                 ),
             ],
@@ -100,11 +111,67 @@ final class VersionBumpResultTest extends Framework\TestCase
                     new Src\Version\Version(2, 0, 0),
                     '"name": "foo/baz",
     "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
                     Src\Enum\OperationState::Modified,
+                ),
+            ],
+            // Unmatched: "foo/version": "{%version%}"
+            [
+                Src\Result\WriteOperation::unmatched(
+                    new Src\Config\FilePattern('"foo/version": "{%version%}"'),
+                ),
+            ],
+            // Unmatched: "baz/version": "{%version%}"
+            [
+                Src\Result\WriteOperation::unmatched(
+                    new Src\Config\FilePattern('"baz/version": "{%version%}"'),
                 ),
             ],
         ];
 
         self::assertEquals($expected, $this->subject->groupedOperations());
+    }
+
+    #[Framework\Attributes\Test]
+    public function hasUnmatchedReportsReturnsTrueIfAnyWriteOperationHasUnmatchedOperationState(): void
+    {
+        self::assertTrue($this->subject->hasUnmatchedReports());
+
+        $subject = new Src\Result\VersionBumpResult(
+            new Src\Config\FileToModify(
+                'package-lock.json',
+                [
+                    '"name": "foo/baz",\s+"version": "{%version%}"',
+                ],
+            ),
+            [
+                new Src\Result\WriteOperation(
+                    new Src\Version\Version(1, 2, 3),
+                    new Src\Version\Version(2, 0, 0),
+                    '"name": "foo/baz",
+        "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
+                    Src\Enum\OperationState::Modified,
+                ),
+                new Src\Result\WriteOperation(
+                    new Src\Version\Version(1, 2, 3),
+                    new Src\Version\Version(2, 0, 0),
+                    '"name": "foo/baz",
+    "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
+                    Src\Enum\OperationState::Modified,
+                ),
+                new Src\Result\WriteOperation(
+                    new Src\Version\Version(1, 2, 0),
+                    new Src\Version\Version(2, 0, 0),
+                    '"name": "foo/baz",
+    "version": "2.0.0"',
+                    new Src\Config\FilePattern('"version": "{%version%}"'),
+                    Src\Enum\OperationState::Modified,
+                ),
+            ],
+        );
+
+        self::assertFalse($subject->hasUnmatchedReports());
     }
 }
