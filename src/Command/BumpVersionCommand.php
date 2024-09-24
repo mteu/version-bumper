@@ -171,6 +171,10 @@ final class BumpVersionCommand extends Command\BaseCommand
     private function decorateResults(array $results, string $rootPath): void
     {
         foreach ($results as $result) {
+            if (!$result->hasOperations()) {
+                continue;
+            }
+
             $path = $result->file()->path();
 
             if (Filesystem\Path::isAbsolute($path)) {
