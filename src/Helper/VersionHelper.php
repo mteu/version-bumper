@@ -21,47 +21,39 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Config;
+namespace EliasHaeussler\VersionBumper\Helper;
+
+use EliasHaeussler\VersionBumper\Version;
+
+use function addcslashes;
+use function str_contains;
+use function str_replace;
 
 /**
- * VersionBumperConfig.
+ * VersionHelper.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
+ *
+ * @internal
  */
-final class VersionBumperConfig
+final class VersionHelper
 {
-    /**
-     * @param list<FileToModify> $filesToModify
-     */
-    public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-    ) {}
+    private const VERSION_PLACEHOLDER = '{%version%}';
+    private const VERSION_REGEX = '(?P<version>\\d+\\.\\d+\\.\\d+)';
 
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
+    public static function isValidVersionPattern(string $pattern): bool
     {
-        return $this->filesToModify;
+        return str_contains($pattern, self::VERSION_PLACEHOLDER);
     }
 
-    public function rootPath(): ?string
+    public static function convertPatternToRegularExpression(string $pattern): string
     {
-        return $this->rootPath;
+        return '/'.str_replace(self::VERSION_PLACEHOLDER, self::VERSION_REGEX, addcslashes($pattern, '/')).'/';
     }
 
-    public function setRootPath(string $rootPath): self
+    public static function replaceVersionInPattern(string $pattern, Version\Version $version): string
     {
-        $this->rootPath = $rootPath;
-
-        return $this;
-    }
-
-    public function releaseOptions(): ReleaseOptions
-    {
-        return $this->releaseOptions;
+        return str_replace(self::VERSION_PLACEHOLDER, $version->full(), $pattern);
     }
 }

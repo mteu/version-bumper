@@ -24,9 +24,7 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Config;
 
 use EliasHaeussler\VersionBumper\Exception;
-
-use function addcslashes;
-use function str_replace;
+use EliasHaeussler\VersionBumper\Helper;
 
 /**
  * FilePattern.
@@ -36,9 +34,6 @@ use function str_replace;
  */
 final class FilePattern
 {
-    private const VERSION_PLACEHOLDER = '{%version%}';
-    private const VERSION_REGEX = '(?P<version>\\d+\\.\\d+\\.\\d+)';
-
     private readonly string $original;
     private readonly string $regularExpression;
 
@@ -47,12 +42,12 @@ final class FilePattern
      */
     public function __construct(string $pattern)
     {
-        if (!str_contains($pattern, self::VERSION_PLACEHOLDER)) {
+        if (!Helper\VersionHelper::isValidVersionPattern($pattern)) {
             throw new Exception\FilePatternIsInvalid($pattern);
         }
 
         $this->original = $pattern;
-        $this->regularExpression = $this->patternToRegex($pattern);
+        $this->regularExpression = Helper\VersionHelper::convertPatternToRegularExpression($pattern);
     }
 
     public function original(): string
@@ -63,10 +58,5 @@ final class FilePattern
     public function regularExpression(): string
     {
         return $this->regularExpression;
-    }
-
-    private function patternToRegex(string $pattern): string
-    {
-        return '/'.str_replace(self::VERSION_PLACEHOLDER, self::VERSION_REGEX, addcslashes($pattern, '/')).'/';
     }
 }

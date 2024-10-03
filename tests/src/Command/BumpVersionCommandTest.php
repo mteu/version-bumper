@@ -152,10 +152,7 @@ final class BumpVersionCommandTest extends Framework\TestCase
         ]);
 
         self::assertSame(Console\Command\Command::FAILURE, $this->commandTester->getStatusCode());
-        self::assertStringContainsString(
-            '*root*: Unexpected key(s) `foo`, expected `filesToModify`, `rootPath`.',
-            $this->commandTester->getDisplay(),
-        );
+        self::assertStringContainsString('*root*: Unexpected key(s) `foo`', $this->commandTester->getDisplay());
     }
 
     #[Framework\Attributes\Test]
@@ -177,6 +174,45 @@ final class BumpVersionCommandTest extends Framework\TestCase
         self::assertStringContainsString('Skipped file due to unmodified contents', $output);
         self::assertStringContainsString('No write operations were performed (dry-run mode).', $output);
         self::assertStringNotContainsString('foobaz', $output);
+    }
+
+    #[Framework\Attributes\Test]
+    public function executeFailsIfNoVersionToReleaseIsGiven(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';
+
+        $this->commandTester->execute([
+            'range' => '1.0.0',
+            '--config' => $configFile,
+            '--dry-run' => true,
+            '--release' => true,
+        ]);
+
+        self::assertSame(Console\Command\Command::FAILURE, $this->commandTester->getStatusCode());
+        self::assertStringContainsString(
+            'A tag "1.0.0" already exists in the repository.',
+            $this->commandTester->getDisplay(),
+        );
+    }
+
+    #[Framework\Attributes\Test]
+    public function executeDecoratesVersionReleaseResult(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';
+
+        $this->commandTester->execute([
+            'range' => '0.1.0',
+            '--config' => $configFile,
+            '--dry-run' => true,
+            '--release' => true,
+        ]);
+
+        $output = $this->commandTester->getDisplay();
+
+        self::assertSame(Console\Command\Command::SUCCESS, $this->commandTester->getStatusCode());
+        self::assertStringContainsString('Added 2 files.', $output);
+        self::assertStringContainsString('Committed: Release 0.1.0', $output);
+        self::assertStringContainsString('Tagged: 0.1.0', $output);
     }
 
     #[Framework\Attributes\Test]

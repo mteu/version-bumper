@@ -50,7 +50,6 @@ final class FileToModify
         private readonly string $path,
         array $patterns = [],
         private readonly bool $reportUnmatched = false,
-        private bool $dryRun = false,
     ) {
         foreach ($patterns as $pattern) {
             $this->add($pattern);
@@ -96,17 +95,5 @@ final class FileToModify
     public function reportUnmatched(): bool
     {
         return $this->reportUnmatched;
-    }
-
-    public function dryRun(): bool
-    {
-        return $this->dryRun;
-    }
-
-    public function performDryRun(bool $dryRun = true): self
-    {
-        $this->dryRun = $dryRun;
-
-        return $this;
     }
 }

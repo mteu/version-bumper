@@ -21,47 +21,48 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Config;
+namespace EliasHaeussler\VersionBumper\Result;
+
+use EliasHaeussler\VersionBumper\Config;
 
 /**
- * VersionBumperConfig.
+ * VersionReleaseResult.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+final class VersionReleaseResult
 {
     /**
-     * @param list<FileToModify> $filesToModify
+     * @param list<Config\FileToModify> $committedFiles
      */
     public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
+        private readonly array $committedFiles,
+        private readonly string $commitMessage,
+        private readonly string $tagName,
+        private readonly ?string $commitId,
     ) {}
 
     /**
-     * @return list<FileToModify>
+     * @return list<Config\FileToModify>
      */
-    public function filesToModify(): array
+    public function committedFiles(): array
     {
-        return $this->filesToModify;
+        return $this->committedFiles;
     }
 
-    public function rootPath(): ?string
+    public function commitMessage(): string
     {
-        return $this->rootPath;
+        return $this->commitMessage;
     }
 
-    public function setRootPath(string $rootPath): self
+    public function tagName(): string
     {
-        $this->rootPath = $rootPath;
-
-        return $this;
+        return $this->tagName;
     }
 
-    public function releaseOptions(): ReleaseOptions
+    public function commitId(): ?string
     {
-        return $this->releaseOptions;
+        return $this->commitId;
     }
 }

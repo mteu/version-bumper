@@ -21,47 +21,21 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Config;
+namespace EliasHaeussler\VersionBumper\Exception;
 
 /**
- * VersionBumperConfig.
+ * TagNameIsInvalid.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+final class TagNameIsInvalid extends Exception
 {
-    /**
-     * @param list<FileToModify> $filesToModify
-     */
-    public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-    ) {}
-
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
+    public function __construct(string $pattern)
     {
-        return $this->filesToModify;
-    }
-
-    public function rootPath(): ?string
-    {
-        return $this->rootPath;
-    }
-
-    public function setRootPath(string $rootPath): self
-    {
-        $this->rootPath = $rootPath;
-
-        return $this;
-    }
-
-    public function releaseOptions(): ReleaseOptions
-    {
-        return $this->releaseOptions;
+        parent::__construct(
+            sprintf('String "%s" does not contain a valid tag name.', $pattern),
+            1727962460,
+        );
     }
 }

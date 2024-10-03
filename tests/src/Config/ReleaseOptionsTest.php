@@ -21,47 +21,27 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Config;
+namespace EliasHaeussler\VersionBumper\Tests\Config;
+
+use EliasHaeussler\VersionBumper as Src;
+use PHPUnit\Framework;
 
 /**
- * VersionBumperConfig.
+ * ReleaseOptionsTest.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+#[Framework\Attributes\CoversClass(Src\Config\ReleaseOptions::class)]
+final class ReleaseOptionsTest extends Framework\TestCase
 {
-    /**
-     * @param list<FileToModify> $filesToModify
-     */
-    public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-    ) {}
-
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
+    #[Framework\Attributes\Test]
+    public function constructorThrowsExceptionIfVersionPlaceholderIsMissingInTagName(): void
     {
-        return $this->filesToModify;
-    }
+        $this->expectExceptionObject(
+            new Src\Exception\TagNameIsInvalid('foo'),
+        );
 
-    public function rootPath(): ?string
-    {
-        return $this->rootPath;
-    }
-
-    public function setRootPath(string $rootPath): self
-    {
-        $this->rootPath = $rootPath;
-
-        return $this;
-    }
-
-    public function releaseOptions(): ReleaseOptions
-    {
-        return $this->releaseOptions;
+        new Src\Config\ReleaseOptions(tagName: 'foo');
     }
 }

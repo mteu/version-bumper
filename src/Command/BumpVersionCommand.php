@@ -26,6 +26,7 @@ namespace EliasHaeussler\VersionBumper\Command;
 use Composer\Command;
 use Composer\Composer;
 use CuyZ\Valinor;
+use CzProject\GitPhp;
 use EliasHaeussler\VersionBumper\Config;
 use EliasHaeussler\VersionBumper\Enum;
 use EliasHaeussler\VersionBumper\Exception;
@@ -54,6 +55,7 @@ final class BumpVersionCommand extends Command\BaseCommand
 {
     private readonly Version\VersionBumper $bumper;
     private readonly Config\ConfigReader $configReader;
+    private readonly Version\VersionReleaser $releaser;
     private Console\Style\SymfonyStyle $io;
 
     public function __construct(?Composer $composer = null)
@@ -66,6 +68,7 @@ final class BumpVersionCommand extends Command\BaseCommand
 
         $this->bumper = new Version\VersionBumper();
         $this->configReader = new Config\ConfigReader();
+        $this->releaser = new Version\VersionReleaser();
     }
 
     protected function configure(): void
@@ -88,6 +91,12 @@ final class BumpVersionCommand extends Command\BaseCommand
             Console\Input\InputOption::VALUE_REQUIRED,
             'Path to configuration file (JSON or YAML) with files in which to bump new versions',
             $this->readConfigFileFromRootPackage(),
+        );
+        $this->addOption(
+            'release',
+            'r',
+            Console\Input\InputOption::VALUE_NONE,
+            'Create a new Git tag after versions are bumped',
         );
         $this->addOption(
             'dry-run',
@@ -113,6 +122,7 @@ final class BumpVersionCommand extends Command\BaseCommand
         $rootPath = (string) getcwd();
         $rangeOrVersion = $input->getArgument('range');
         $configFile = $input->getOption('config') ?? $this->configReader->detectFile($rootPath);
+        $release = $input->getOption('release');
         $dryRun = $input->getOption('dry-run');
         $strict = $input->getOption('strict');
 
@@ -129,34 +139,26 @@ final class BumpVersionCommand extends Command\BaseCommand
         }
 
         try {
-            $config = $this->configReader->readFromFile($configFile);
-            $config->performDryRun($dryRun);
+            $result = $this->bumpVersions($configFile, $rangeOrVersion, $rootPath, $dryRun);
 
-            $versionRange = Enum\VersionRange::tryFromInput($rangeOrVersion);
-            $results = $this->bumper->bump(
-                $config->filesToModify(),
-                $config->rootPath() ?? $rootPath,
-                $versionRange ?? $rangeOrVersion,
-            );
-        } catch (Valinor\Mapper\MappingError $error) {
-            $this->decorateMappingError($error, $configFile);
+            if (null === $result) {
+                return self::FAILURE;
+            }
 
-            return self::FAILURE;
-        } catch (Exception\Exception $exception) {
-            $this->io->error($exception->getMessage());
+            [$config, $results] = $result;
 
-            return self::FAILURE;
-        }
-
-        $this->decorateResults($results, $rootPath);
-
-        if ($dryRun) {
-            $this->io->note('No write operations were performed (dry-run mode).');
+            if ($release && !$this->releaseVersion($results, $rootPath, $config->releaseOptions(), $dryRun)) {
+                return self::FAILURE;
+            }
+        } finally {
+            if ($dryRun) {
+                $this->io->note('No write operations were performed (dry-run mode).');
+            }
         }
 
         if ($strict) {
-            foreach ($results as $result) {
-                if ($result->hasUnmatchedReports()) {
+            foreach ($results as $versionBumpResult) {
+                if ($versionBumpResult->hasUnmatchedReports()) {
                     return self::FAILURE;
                 }
             }
@@ -166,10 +168,62 @@ final class BumpVersionCommand extends Command\BaseCommand
     }
 
     /**
+     * @return array{Config\VersionBumperConfig, list<Result\VersionBumpResult>}|null
+     */
+    private function bumpVersions(string $configFile, string $rangeOrVersion, string $rootPath, bool $dryRun): ?array
+    {
+        try {
+            $config = $this->configReader->readFromFile($configFile);
+            $versionRange = Enum\VersionRange::tryFromInput($rangeOrVersion);
+
+            $results = $this->bumper->bump(
+                $config->filesToModify(),
+                $config->rootPath() ?? $rootPath,
+                $versionRange ?? $rangeOrVersion,
+                $dryRun,
+            );
+
+            $this->decorateVersionBumpResults($results, $rootPath);
+
+            return [$config, $results];
+        } catch (Valinor\Mapper\MappingError $error) {
+            $this->decorateMappingError($error, $configFile);
+        } catch (Exception\Exception $exception) {
+            $this->io->error($exception->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
      * @param list<Result\VersionBumpResult> $results
      */
-    private function decorateResults(array $results, string $rootPath): void
+    private function releaseVersion(array $results, string $rootPath, Config\ReleaseOptions $options, bool $dryRun): bool
     {
+        $this->io->title('Release');
+
+        try {
+            $releaseResult = $this->releaser->release($results, $rootPath, $options, $dryRun);
+
+            $this->decorateVersionReleaseResult($releaseResult);
+
+            return true;
+        } catch (Exception\Exception $exception) {
+            $this->io->error($exception->getMessage());
+        } catch (GitPhp\GitException $exception) {
+            $this->io->error('Git error during release: '.$exception->getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * @param list<Result\VersionBumpResult> $results
+     */
+    private function decorateVersionBumpResults(array $results, string $rootPath): void
+    {
+        $titleDisplayed = false;
+
         foreach ($results as $result) {
             if (!$result->hasOperations()) {
                 continue;
@@ -179,6 +233,11 @@ final class BumpVersionCommand extends Command\BaseCommand
 
             if (Filesystem\Path::isAbsolute($path)) {
                 $path = Filesystem\Path::makeRelative($path, $rootPath);
+            }
+
+            if (!$titleDisplayed) {
+                $this->io->title('Bumped versions');
+                $titleDisplayed = true;
             }
 
             $this->io->section($path);
@@ -203,6 +262,23 @@ final class BumpVersionCommand extends Command\BaseCommand
                 $this->io->writeln($message);
             }
         }
+    }
+
+    private function decorateVersionReleaseResult(Result\VersionReleaseResult $result): void
+    {
+        $numberOfCommittedFiles = count($result->committedFiles());
+        $releaseInformation = [
+            sprintf('Added %d file%s.', $numberOfCommittedFiles, 1 !== $numberOfCommittedFiles ? 's' : ''),
+            sprintf('Committed: <info>%s</info>', $result->commitMessage()),
+            sprintf('Commit hash: %s', $result->commitId()),
+            sprintf('Tagged: <info>%s</info>', $result->tagName()),
+        ];
+
+        if (null === $result->commitId()) {
+            unset($releaseInformation[2]);
+        }
+
+        $this->io->listing($releaseInformation);
     }
 
     private function decorateMappingError(Valinor\Mapper\MappingError $error, string $configFile): void

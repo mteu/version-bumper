@@ -59,11 +59,12 @@ final class VersionBumper
         array $files,
         string $rootPath,
         Enum\VersionRange|string $versionRange,
+        bool $dryRun = false,
     ): array {
         $results = [];
 
         foreach ($files as $file) {
-            $results[] = $this->bumpVersionsInFile($file, $rootPath, $versionRange);
+            $results[] = $this->bumpVersionsInFile($file, $rootPath, $versionRange, $dryRun);
         }
 
         return $results;
@@ -82,6 +83,7 @@ final class VersionBumper
         Config\FileToModify $file,
         string $rootPath,
         Enum\VersionRange|string $versionRange,
+        bool $dryRun,
     ): Result\VersionBumpResult {
         $path = $file->fullPath($rootPath);
 
@@ -122,7 +124,7 @@ final class VersionBumper
         $result = new Result\VersionBumpResult($file, $operations);
 
         // Don't bump unmodified file contents
-        if ($modified === $contents || $file->dryRun()) {
+        if ($modified === $contents || $dryRun) {
             return $result;
         }
 
