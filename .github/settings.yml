@@ -119,6 +119,12 @@ branches:
           - 'Tests (PHP 8.2, Composer 2.7 & lowest dependencies)'
           - 'Tests (PHP 8.3, Composer 2.7 & highest dependencies)'
           - 'Tests (PHP 8.3, Composer 2.7 & lowest dependencies)'
+          - 'Tests (PHP 8.1, Composer 2.8 & highest dependencies)'
+          - 'Tests (PHP 8.1, Composer 2.8 & lowest dependencies)'
+          - 'Tests (PHP 8.2, Composer 2.8 & highest dependencies)'
+          - 'Tests (PHP 8.2, Composer 2.8 & lowest dependencies)'
+          - 'Tests (PHP 8.3, Composer 2.8 & highest dependencies)'
+          - 'Tests (PHP 8.3, Composer 2.8 & lowest dependencies)'
           - 'Test coverage'
           - 'coverage/coveralls'
       enforce_admins: false
