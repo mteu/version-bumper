@@ -10,6 +10,9 @@
 				"$ref": "#/definitions/fileToModify"
 			}
 		},
+		"releaseOptions": {
+			"$ref": "#/definitions/releaseOptions"
+		},
 		"rootPath": {
 			"type": "string",
 			"title": "Relative or absolute path to project root",
@@ -35,8 +38,7 @@
 					"title": "List of version patterns to be searched and replaced in the configured file",
 					"description": "Each pattern must contain a `{%version%}` placeholder that is replaced by the new version. Patterns are internally converted to regular expressions, so feel free to use regex syntax such as `\\s+`.",
 					"items": {
-						"type": "string",
-						"pattern": "\\{%version%\\}"
+						"$ref": "#/definitions/versionPattern"
 					}
 				},
 				"reportUnmatched": {
@@ -49,6 +51,36 @@
 				"path",
 				"patterns"
 			]
+		},
+		"releaseOptions": {
+			"type": "object",
+			"title": "Set of release options to respect with the --release command option",
+			"properties": {
+				"commitMessage": {
+					"type": "string",
+					"title": "Commit message pattern to use for new releases",
+					"description": "May contain a `{%version%}` placeholder that is replaced by the version to release."
+				},
+				"overwriteExistingTag": {
+					"type": "boolean",
+					"title": "Define whether existing tags should be overwritten",
+					"description": "If set to `true`, the existing tag will be deleted before the new tag is created."
+				},
+				"signTag": {
+					"type": "boolean",
+					"title": "Define whether to sign new tags",
+					"description": "Uses Git's `-s` command option to sign the new tag using the Git-configured signing key."
+				},
+				"tagName": {
+					"title": "Tag name pattern to use for new releases",
+					"description": "Must contain a `{%version%}` placeholder that is replaced by the version to release.",
+					"$ref": "#/definitions/versionPattern"
+				}
+			}
+		},
+		"versionPattern": {
+			"type": "string",
+			"pattern": "\\{%version%\\}"
 		}
 	}
 }

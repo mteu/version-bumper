@@ -21,47 +21,26 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Config;
+namespace EliasHaeussler\VersionBumper\Tests\Exception;
+
+use EliasHaeussler\VersionBumper as Src;
+use PHPUnit\Framework;
 
 /**
- * VersionBumperConfig.
+ * NoModifiedFilesFoundTest.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+#[Framework\Attributes\CoversClass(Src\Exception\NoModifiedFilesFound::class)]
+final class NoModifiedFilesFoundTest extends Framework\TestCase
 {
-    /**
-     * @param list<FileToModify> $filesToModify
-     */
-    public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-    ) {}
-
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
+    #[Framework\Attributes\Test]
+    public function constructorCreatesExceptionForUnmodifiedFiles(): void
     {
-        return $this->filesToModify;
-    }
+        $actual = new Src\Exception\NoModifiedFilesFound();
 
-    public function rootPath(): ?string
-    {
-        return $this->rootPath;
-    }
-
-    public function setRootPath(string $rootPath): self
-    {
-        $this->rootPath = $rootPath;
-
-        return $this;
-    }
-
-    public function releaseOptions(): ReleaseOptions
-    {
-        return $this->releaseOptions;
+        self::assertSame('No files were modified during version bump.', $actual->getMessage());
+        self::assertSame(1727963889, $actual->getCode());
     }
 }

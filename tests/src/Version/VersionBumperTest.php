@@ -169,8 +169,6 @@ FOO,
     public function bumpIncreasesVersionRange(): void
     {
         $fooFile = $this->filesToModify[0];
-        $fooFile->performDryRun();
-
         $files = [$fooFile];
         $rootPath = dirname(__DIR__).'/Fixtures/RootPath';
 
@@ -199,7 +197,7 @@ FOO,
             ),
         ];
 
-        $actual = $this->subject->bump($files, $rootPath, Src\Enum\VersionRange::Minor);
+        $actual = $this->subject->bump($files, $rootPath, Src\Enum\VersionRange::Minor, true);
 
         self::assertCount(1, $actual);
         self::assertSame($fooFile, $actual[0]->file());

@@ -23,45 +23,48 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Config;
 
+use EliasHaeussler\VersionBumper\Exception;
+use EliasHaeussler\VersionBumper\Helper;
+
 /**
- * VersionBumperConfig.
+ * ReleaseOptions.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+final class ReleaseOptions
 {
     /**
-     * @param list<FileToModify> $filesToModify
+     * @throws Exception\TagNameIsInvalid
      */
     public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-    ) {}
-
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
-    {
-        return $this->filesToModify;
+        private readonly string $commitMessage = 'Release {%version%}',
+        private readonly string $tagName = '{%version%}',
+        private readonly bool $overwriteExistingTag = false,
+        private readonly bool $signTag = false,
+    ) {
+        if (!Helper\VersionHelper::isValidVersionPattern($this->tagName)) {
+            throw new Exception\TagNameIsInvalid($this->tagName);
+        }
     }
 
-    public function rootPath(): ?string
+    public function commitMessage(): string
     {
-        return $this->rootPath;
+        return $this->commitMessage;
     }
 
-    public function setRootPath(string $rootPath): self
+    public function tagName(): string
     {
-        $this->rootPath = $rootPath;
-
-        return $this;
+        return $this->tagName;
     }
 
-    public function releaseOptions(): ReleaseOptions
+    public function overwriteExistingTag(): bool
     {
-        return $this->releaseOptions;
+        return $this->overwriteExistingTag;
+    }
+
+    public function signTag(): bool
+    {
+        return $this->signTag;
     }
 }
