@@ -108,7 +108,7 @@ foreach ($results as $result) {
 }
 ```
 
-Release can be made by the
+A release can be created by the
 [`Version\VersionReleaser`](src/Version/VersionReleaser.php) class:
 
 ```php
@@ -130,6 +130,11 @@ echo sprintf(
 );
 echo PHP_EOL;
 ```
+
+> [!TIP]
+> You can use the method argument `$dryRun` in both
+> `VersionBumper` and `VersionReleaser` classes to skip any
+> write operations (dry-run mode).
 
 ## 📝 Configuration
 
