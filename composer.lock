@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e214751658255ab15e0f4937e1db5cb4",
+    "content-hash": "01c807ea08eddb690e9a68cd874e2073",
     "packages": [
         {
             "name": "cuyz/valinor",
@@ -80,56 +80,197 @@
             "time": "2024-11-06T07:46:46+00:00"
         },
         {
-            "name": "czproject/git-php",
-            "version": "v4.3.0",
+            "name": "cypresslab/gitelephant",
+            "version": "v4.5.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/czproject/git-php.git",
-                "reference": "f7fe85cc526c5f8e7ed809f7f9c68f2696940a8a"
+                "url": "https://github.com/matteosister/GitElephant.git",
+                "reference": "6f396bdb41fa0b2e5e414e16188f6eb107021947"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/czproject/git-php/zipball/f7fe85cc526c5f8e7ed809f7f9c68f2696940a8a",
-                "reference": "f7fe85cc526c5f8e7ed809f7f9c68f2696940a8a",
+                "url": "https://api.github.com/repos/matteosister/GitElephant/zipball/6f396bdb41fa0b2e5e414e16188f6eb107021947",
+                "reference": "6f396bdb41fa0b2e5e414e16188f6eb107021947",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6.0"
+                "php": ">=7.2.0",
+                "phpcollection/phpcollection": "~0.4|~0.5",
+                "symfony/filesystem": ">=3.4",
+                "symfony/finder": ">=3.4",
+                "symfony/process": ">=3.4"
             },
             "require-dev": {
-                "nette/tester": "^2.0"
+                "mockery/mockery": "~1.1",
+                "php": ">=7.2.0",
+                "phpstan/phpstan": "*",
+                "phpstan/phpstan-phpunit": "*",
+                "phpunit/phpunit": "~8.0|~9.0",
+                "rector/rector": "*",
+                "symplify/easy-coding-standard": "*"
             },
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "src/"
-                ]
+                "psr-0": {
+                    "GitElephant": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-3-Clause"
+                "LGPL-3.0+"
             ],
             "authors": [
                 {
-                    "name": "Jan Pecha",
-                    "email": "janpecha@email.cz"
+                    "name": "Matteo Giachino",
+                    "email": "matteog@gmail.com"
                 }
             ],
-            "description": "Library for work with Git repository in PHP.",
+            "description": "An abstraction layer for git written in PHP",
+            "homepage": "http://gitelephant.cypresslab.net/",
             "keywords": [
                 "git"
             ],
             "support": {
-                "issues": "https://github.com/czproject/git-php/issues",
-                "source": "https://github.com/czproject/git-php/tree/v4.3.0"
+                "issues": "https://github.com/matteosister/GitElephant/issues",
+                "source": "https://github.com/matteosister/GitElephant/tree/v4.5.0"
             },
             "funding": [
                 {
-                    "url": "https://www.janpecha.cz/donate/git-php/",
-                    "type": "other"
+                    "url": "https://tidelift.com/funding/github/packagist/cypresslab/gitelephant",
+                    "type": "tidelift"
                 }
             ],
-            "time": "2024-08-05T13:28:31+00:00"
+            "time": "2022-10-08T12:56:52+00:00"
+        },
+        {
+            "name": "phpcollection/phpcollection",
+            "version": "0.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/schmittjoh/php-collection.git",
+                "reference": "56d18c8c2c0400f2838703246ac7de919a605763"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/schmittjoh/php-collection/zipball/56d18c8c2c0400f2838703246ac7de919a605763",
+                "reference": "56d18c8c2c0400f2838703246ac7de919a605763",
+                "shasum": ""
+            },
+            "require": {
+                "phpoption/phpoption": "1.*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "PhpCollection": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache2"
+            ],
+            "authors": [
+                {
+                    "name": "Johannes M. Schmitt",
+                    "email": "schmittjoh@gmail.com"
+                }
+            ],
+            "description": "General-Purpose Collection Library for PHP",
+            "keywords": [
+                "collection",
+                "list",
+                "map",
+                "sequence",
+                "set"
+            ],
+            "support": {
+                "issues": "https://github.com/schmittjoh/php-collection/issues",
+                "source": "https://github.com/schmittjoh/php-collection/tree/0.6.0"
+            },
+            "time": "2022-03-21T13:02:41+00:00"
+        },
+        {
+            "name": "phpoption/phpoption",
+            "version": "1.9.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/schmittjoh/php-option.git",
+                "reference": "e3fac8b24f56113f7cb96af14958c0dd16330f54"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/schmittjoh/php-option/zipball/e3fac8b24f56113f7cb96af14958c0dd16330f54",
+                "reference": "e3fac8b24f56113f7cb96af14958c0dd16330f54",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2.5 || ^8.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.2",
+                "phpunit/phpunit": "^8.5.39 || ^9.6.20 || ^10.5.28"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": false
+                },
+                "branch-alias": {
+                    "dev-master": "1.9-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpOption\\": "src/PhpOption/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Johannes M. Schmitt",
+                    "email": "schmittjoh@gmail.com",
+                    "homepage": "https://github.com/schmittjoh"
+                },
+                {
+                    "name": "Graham Campbell",
+                    "email": "hello@gjcampbell.co.uk",
+                    "homepage": "https://github.com/GrahamCampbell"
+                }
+            ],
+            "description": "Option Type for PHP",
+            "keywords": [
+                "language",
+                "option",
+                "php",
+                "type"
+            ],
+            "support": {
+                "issues": "https://github.com/schmittjoh/php-option/issues",
+                "source": "https://github.com/schmittjoh/php-option/tree/1.9.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/GrahamCampbell",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/phpoption/phpoption",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-07-20T21:41:07+00:00"
         },
         {
             "name": "psr/container",
@@ -463,6 +604,70 @@
             "time": "2024-10-25T15:07:50+00:00"
         },
         {
+            "name": "symfony/finder",
+            "version": "v6.4.13",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "daea9eca0b08d0ed1dc9ab702a46128fd1be4958"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/daea9eca0b08d0ed1dc9ab702a46128fd1be4958",
+                "reference": "daea9eca0b08d0ed1dc9ab702a46128fd1be4958",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "symfony/filesystem": "^6.0|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Finder\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Finds files and directories via an intuitive fluent interface",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/finder/tree/v6.4.13"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-10-01T08:30:56+00:00"
+        },
+        {
             "name": "symfony/polyfill-ctype",
             "version": "v1.31.0",
             "source": {
@@ -779,6 +984,67 @@
                 }
             ],
             "time": "2024-09-09T11:45:10+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v6.4.13",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "1f9f59b46880201629df3bd950fc5ae8c55b960f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/1f9f59b46880201629df3bd950fc5ae8c55b960f",
+                "reference": "1f9f59b46880201629df3bd950fc5ae8c55b960f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Executes commands in sub-processes",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/process/tree/v6.4.13"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-09-25T14:18:03+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -5672,70 +5938,6 @@
             "time": "2024-04-18T09:32:20+00:00"
         },
         {
-            "name": "symfony/finder",
-            "version": "v6.4.13",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/finder.git",
-                "reference": "daea9eca0b08d0ed1dc9ab702a46128fd1be4958"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/daea9eca0b08d0ed1dc9ab702a46128fd1be4958",
-                "reference": "daea9eca0b08d0ed1dc9ab702a46128fd1be4958",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.1"
-            },
-            "require-dev": {
-                "symfony/filesystem": "^6.0|^7.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Finder\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Finds files and directories via an intuitive fluent interface",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/finder/tree/v6.4.13"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-10-01T08:30:56+00:00"
-        },
-        {
             "name": "symfony/mime",
             "version": "v6.4.13",
             "source": {
@@ -6203,67 +6405,6 @@
             "time": "2024-09-09T11:45:10+00:00"
         },
         {
-            "name": "symfony/process",
-            "version": "v6.4.15",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/process.git",
-                "reference": "3cb242f059c14ae08591c5c4087d1fe443564392"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/3cb242f059c14ae08591c5c4087d1fe443564392",
-                "reference": "3cb242f059c14ae08591c5c4087d1fe443564392",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Process\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Executes commands in sub-processes",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/process/tree/v6.4.15"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-11-06T14:19:14+00:00"
-        },
-        {
             "name": "symfony/stopwatch",
             "version": "v6.4.13",
             "source": {
@@ -6378,13 +6519,13 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
         "composer-plugin-api": "^2.0"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

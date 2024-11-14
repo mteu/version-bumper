@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Tests\Version;
 
-use CzProject\GitPhp;
 use EliasHaeussler\VersionBumper as Src;
+use EliasHaeussler\VersionBumper\Tests;
 use Generator;
 use PHPUnit\Framework;
 
@@ -40,7 +40,7 @@ use function getcwd;
 #[Framework\Attributes\CoversClass(Src\Version\VersionReleaser::class)]
 final class VersionReleaserTest extends Framework\TestCase
 {
-    private GitPhp\Runners\MemoryRunner $runner;
+    private Tests\Fixtures\Classes\DummyCaller $caller;
     private Src\Version\VersionReleaser $subject;
 
     /**
@@ -54,8 +54,8 @@ final class VersionReleaserTest extends Framework\TestCase
 
         self::assertIsString($cwd);
 
-        $this->runner = new GitPhp\Runners\MemoryRunner($cwd);
-        $this->subject = new Src\Version\VersionReleaser($this->runner);
+        $this->caller = new Tests\Fixtures\Classes\DummyCaller();
+        $this->subject = new Src\Version\VersionReleaser($this->caller);
         $this->results = [
             new Src\Result\VersionBumpResult(
                 new Src\Config\FileToModify('composer.json'),
@@ -160,21 +160,11 @@ final class VersionReleaserTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function releaseThrowsExceptionIfTagAlreadyExists(): void
     {
-        $this->runner->setResult(
-            ['add', '--end-of-options', 'composer.json'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['commit', '-m', 'Release 2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag'],
-            [],
-            '2.0.0',
-        );
+        $this->caller->results = [
+            ['2.0.0', 'tag'],
+            ['2.0.0', 'tag'],
+            ['', "rev-list '-n1' 'refs/tags/2.0.0'"],
+        ];
 
         $this->expectExceptionObject(
             new Src\Exception\TagAlreadyExists('2.0.0'),
@@ -186,36 +176,20 @@ final class VersionReleaserTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function releaseOverwritesExistingTag(): void
     {
-        $this->runner->setResult(
-            ['add', '--end-of-options', 'composer.json'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['commit', '-m', 'Release 2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag'],
-            [],
-            '2.0.0',
-        );
-        $this->runner->setResult(
-            ['tag', '-d', '2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag', '-m', '2.0.0', '--end-of-options', '2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['log', '--pretty=format:%H', '-n', '1'],
-            [],
-            'cf79760440d4a34c85cf9ceeefbf2140fad04eb1',
-        );
+        $this->caller->results = [
+            ['2.0.0', 'tag'],
+            ['2.0.0', 'tag'],
+            ['4df7df039281b35aca23df13a7ca1f4be1b0e443', "rev-list '-n1' 'refs/tags/2.0.0'"],
+            ['2.0.0', 'tag'],
+            ['4df7df039281b35aca23df13a7ca1f4be1b0e443', "rev-list '-n1' 'refs/tags/2.0.0'"],
+            ['', "tag '-d' '2.0.0'"],
+            ['', "add '--all' 'composer.json'"],
+            ['', "commit '-m' 'Release 2.0.0'"],
+            ['', "tag '-m' '2.0.0' '2.0.0'"],
+            ['2.0.0', 'tag'],
+            ['2.0.0', 'tag'],
+            ['cf79760440d4a34c85cf9ceeefbf2140fad04eb1', "rev-list '-n1' 'refs/tags/2.0.0'"],
+        ];
 
         $expected = new Src\Result\VersionReleaseResult(
             [
@@ -239,31 +213,15 @@ final class VersionReleaserTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function releaseSignsTag(): void
     {
-        $this->runner->setResult(
-            ['add', '--end-of-options', 'composer.json'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['commit', '-m', 'Release 2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag', '-m', '2.0.0', '-s', '--end-of-options', '2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['log', '--pretty=format:%H', '-n', '1'],
-            [],
-            'cf79760440d4a34c85cf9ceeefbf2140fad04eb1',
-        );
+        $this->caller->results = [
+            ['', 'tag'],
+            ['', "add '--all' 'composer.json'"],
+            ['', "commit '-m' 'Release 2.0.0'"],
+            ['', "tag '-m' '2.0.0' '2.0.0' -s"],
+            ['2.0.0', 'tag'],
+            ['2.0.0', 'tag'],
+            ['cf79760440d4a34c85cf9ceeefbf2140fad04eb1', "rev-list '-n1' 'refs/tags/2.0.0'"],
+        ];
 
         $expected = new Src\Result\VersionReleaseResult(
             [
@@ -287,31 +245,15 @@ final class VersionReleaserTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function releaseRespectsCustomCommitMessageAndTagName(): void
     {
-        $this->runner->setResult(
-            ['add', '--end-of-options', 'composer.json'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['commit', '-m', '[RELEASE] Release of xyz 2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['tag', '-m', 'v2.0.0', '--end-of-options', 'v2.0.0'],
-            [],
-            '',
-        );
-        $this->runner->setResult(
-            ['log', '--pretty=format:%H', '-n', '1'],
-            [],
-            'cf79760440d4a34c85cf9ceeefbf2140fad04eb1',
-        );
+        $this->caller->results = [
+            ['', 'tag'],
+            ['', "add '--all' 'composer.json'"],
+            ['', "commit '-m' '[RELEASE] Release of xyz 2.0.0'"],
+            ['', "tag '-m' 'v2.0.0' 'v2.0.0'"],
+            ['v2.0.0', 'tag'],
+            ['v2.0.0', 'tag'],
+            ['cf79760440d4a34c85cf9ceeefbf2140fad04eb1', "rev-list '-n1' 'refs/tags/v2.0.0'"],
+        ];
 
         $expected = new Src\Result\VersionReleaseResult(
             [
@@ -338,11 +280,9 @@ final class VersionReleaserTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function releaseDoesNotPerformAnyWriteOperationsInDryRunMode(): void
     {
-        $this->runner->setResult(
-            ['tag'],
-            [],
-            '',
-        );
+        $this->caller->results = [
+            ['', 'tag'],
+        ];
 
         $expected = new Src\Result\VersionReleaseResult(
             [
@@ -390,5 +330,10 @@ final class VersionReleaserTest extends Framework\TestCase
                 ),
             ],
         ];
+    }
+
+    protected function tearDown(): void
+    {
+        $this->caller->results = [];
     }
 }

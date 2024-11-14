@@ -26,7 +26,6 @@ namespace EliasHaeussler\VersionBumper\Command;
 use Composer\Command;
 use Composer\Composer;
 use CuyZ\Valinor;
-use CzProject\GitPhp;
 use EliasHaeussler\VersionBumper\Config;
 use EliasHaeussler\VersionBumper\Enum;
 use EliasHaeussler\VersionBumper\Exception;
@@ -210,7 +209,7 @@ final class BumpVersionCommand extends Command\BaseCommand
             return true;
         } catch (Exception\Exception $exception) {
             $this->io->error($exception->getMessage());
-        } catch (GitPhp\GitException $exception) {
+        } catch (\Exception $exception) {
             $this->io->error('Git error during release: '.$exception->getMessage());
         }
 

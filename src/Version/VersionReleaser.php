@@ -23,12 +23,13 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Version;
 
-use CzProject\GitPhp;
 use EliasHaeussler\VersionBumper\Config;
 use EliasHaeussler\VersionBumper\Enum;
 use EliasHaeussler\VersionBumper\Exception;
 use EliasHaeussler\VersionBumper\Helper;
 use EliasHaeussler\VersionBumper\Result;
+use GitElephant\Command;
+use GitElephant\Repository;
 
 use function in_array;
 
@@ -40,21 +41,18 @@ use function in_array;
  */
 final class VersionReleaser
 {
-    private readonly GitPhp\Git $git;
-
-    public function __construct(?GitPhp\IRunner $runner = null)
-    {
-        $this->git = new GitPhp\Git($runner);
-    }
+    public function __construct(
+        private readonly ?Command\Caller\CallerInterface $caller = null,
+    ) {}
 
     /**
      * @param list<Result\VersionBumpResult> $results
      *
      * @throws Exception\AmbiguousVersionsDetected
+     * @throws Exception\CouldNotCreateGitTag
      * @throws Exception\NoModifiedFilesFound
      * @throws Exception\TagAlreadyExists
      * @throws Exception\TargetVersionIsMissing
-     * @throws GitPhp\GitException
      */
     public function release(
         array $results,
@@ -74,40 +72,45 @@ final class VersionReleaser
             throw new Exception\NoModifiedFilesFound();
         }
 
-        $repository = $this->git->open($rootPath);
+        $repository = new Repository($rootPath);
         $commitMessage = Helper\VersionHelper::replaceVersionInPattern($options->commitMessage(), $version);
         $tagName = Helper\VersionHelper::replaceVersionInPattern($options->tagName(), $version);
         $commitId = null;
 
+        // Inject custom repository caller
+        if (null !== $this->caller) {
+            $repository->setCaller($this->caller);
+        }
+
         // Check if tag already exists
-        if (in_array($tagName, $repository->getTags() ?? [], true)) {
+        if (null !== $repository->getTag($tagName)) {
             if (!$options->overwriteExistingTag()) {
                 throw new Exception\TagAlreadyExists($tagName);
             }
 
             if (!$dryRun) {
-                $repository->removeTag($tagName);
+                $repository->deleteTag($tagName);
             }
         }
 
         if (!$dryRun) {
-            // Commit modified files
-            $repository->addFile(
-                array_map(static fn (Config\FileToModify $file) => $file->path(), $modifiedFiles),
-            );
-            $repository->commit($commitMessage);
-
-            // Create tag
-            $tagOptions = [
-                '-m' => $tagName,
-            ];
-
-            if ($options->signTag()) {
-                $tagOptions[] = '-s';
+            // Add and commit modified files
+            foreach ($modifiedFiles as $file) {
+                $repository->stage($file->path());
             }
 
-            $repository->createTag($tagName, $tagOptions);
-            $commitId = $repository->getLastCommitId()->toString();
+            $repository->commit($commitMessage);
+
+            $tagCommand = Command\TagCommand::getInstance($repository)->create($tagName, null, $tagName);
+
+            if ($options->signTag()) {
+                $tagCommand .= ' -s';
+            }
+
+            $repository->getCaller()->execute($tagCommand);
+
+            $tag = $repository->getTag($tagName) ?? throw new Exception\CouldNotCreateGitTag($tagName);
+            $commitId = $tag->getSha();
         }
 
         return new Result\VersionReleaseResult($modifiedFiles, $commitMessage, $tagName, $commitId);
