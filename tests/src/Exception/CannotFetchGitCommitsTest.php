@@ -21,41 +21,26 @@ declare(strict_types=1);
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace EliasHaeussler\VersionBumper\Tests\Config;
+namespace EliasHaeussler\VersionBumper\Tests\Exception;
 
 use EliasHaeussler\VersionBumper as Src;
 use PHPUnit\Framework;
 
 /**
- * FilePatternTest.
+ * CannotFetchGitCommitsTest.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-#[Framework\Attributes\CoversClass(Src\Config\FilePattern::class)]
-final class FilePatternTest extends Framework\TestCase
+#[Framework\Attributes\CoversClass(Src\Exception\CannotFetchGitCommits::class)]
+final class CannotFetchGitCommitsTest extends Framework\TestCase
 {
-    private Src\Config\FilePattern $subject;
-
-    public function setUp(): void
-    {
-        $this->subject = new Src\Config\FilePattern('foo/foo: {%version%}');
-    }
-
     #[Framework\Attributes\Test]
-    public function constructorThrowsExceptionIfVersionPlaceholderIsMissing(): void
+    public function constructorCreatesExceptionForGivenDiff(): void
     {
-        $this->expectExceptionObject(
-            new Src\Exception\FilePatternIsInvalid('foo'),
-        );
+        $actual = new Src\Exception\CannotFetchGitCommits('foo..baz');
 
-        new Src\Config\FilePattern('foo');
-    }
-
-    #[Framework\Attributes\Test]
-    public function constructorConvertsPatternToRegularExpression(): void
-    {
-        self::assertSame('foo/foo: {%version%}', $this->subject->original());
-        self::assertSame('/foo\/foo: (?P<version>v?\d+\.\d+\.\d+)/', $this->subject->regularExpression());
+        self::assertSame('Unable to fetch Git commits between "foo..baz" from repository.', $actual->getMessage());
+        self::assertSame(1731358503, $actual->getCode());
     }
 }

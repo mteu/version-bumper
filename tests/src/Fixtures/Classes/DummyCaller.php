@@ -25,8 +25,11 @@ namespace EliasHaeussler\VersionBumper\Tests\Fixtures\Classes;
 
 use GitElephant\Command;
 use PHPUnit\Framework\Assert;
+use Throwable;
 
+use function array_map;
 use function array_shift;
+use function explode;
 use function sprintf;
 
 /**
@@ -38,7 +41,7 @@ use function sprintf;
 final class DummyCaller extends Command\Caller\AbstractCaller
 {
     /**
-     * @var list<array{string, string}>
+     * @var list<array{string|Throwable, string}>
      */
     public array $results = [];
 
@@ -47,6 +50,8 @@ final class DummyCaller extends Command\Caller\AbstractCaller
         $result = array_shift($this->results);
 
         if (null === $result) {
+            $this->resetOutput();
+
             return $this;
         }
 
@@ -58,9 +63,19 @@ final class DummyCaller extends Command\Caller\AbstractCaller
             );
         }
 
+        if ($result instanceof Throwable) {
+            throw $result;
+        }
+
         $this->rawOutput = $result;
-        $this->outputLines = [$result];
+        $this->outputLines = array_map('rtrim', explode(PHP_EOL, $result));
 
         return $this;
+    }
+
+    public function resetOutput(): void
+    {
+        $this->rawOutput = '';
+        $this->outputLines = [];
     }
 }

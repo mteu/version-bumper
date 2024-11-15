@@ -27,8 +27,13 @@ composer require --dev eliashaeussler/version-bumper
 
 ### Console command `bump-version`
 
+> [!TIP]
+> The `<range>` command option can be omitted if
+> [version range auto-detection](#version-range-auto-detection)
+> is properly configured.
+
 ```bash
-$ composer bump-version <range> [-c|--config CONFIG] [-r|--release] [--dry-run] [--strict]
+$ composer bump-version [<range>] [-c|--config CONFIG] [-r|--release] [--dry-run] [--strict]
 ```
 
 Pass the following options to the console command:
@@ -51,10 +56,131 @@ Pass the following options to the console command:
   calculate and display version bumps.
 * `--strict`: Fail if any unmatched file pattern is reported.
 
+#### Version range auto-detection
+
+Normally, an explicit version range or version is passed to
+the `bump-version` command. However, it may become handy if
+a version range is auto-detected, based on the Git history.
+This sort of auto-detection is automatically triggered if the
+`<range>` command option is omitted.
+
+> [!IMPORTANT]
+> Auto-detection is only possible if [`versionRangeIndicators`](#version-range-indicators)
+> are configured in the config file.
+
+To use the auto-detection feature, make sure to add version
+range indicators to your config file:
+
+```yaml
+versionRangeIndicators:
+  # 1️⃣ Bump major version on breaking changes, determined by commit message
+  - range: major
+    patterns:
+      - type: commitMessage
+        pattern: '/^\[!!!]/'
+
+  # 2️⃣ Bump major version if controllers are deleted and API schema changes
+  - range: major
+    # All configured patterns must match to use this indicator
+    strategy: matchAll
+    patterns:
+      - type: fileDeleted
+        pattern: '/^src\/Controller\/.+Controller\.php$/'
+      - type: fileModified
+        pattern: '/^res\/api\.schema\.json$/'
+
+  # 3️⃣ Bump minor version when new features are added
+  - range: minor
+    patterns:
+      - type: commitMessage
+        pattern: '/^\[FEATURE]/'
+
+  # 4️⃣ Bump patch version if maintenance or documentation tasks were performed
+  - range: patch
+    patterns:
+      - type: commitMessage
+        pattern: '/^\[TASK]/'
+      - type: commitMessage
+        pattern: '/^\[BUGFIX]/'
+      - type: commitMessage
+        pattern: '/^\[DOCS]/'
+
+  # 5️⃣ Bump patch version if no sources have changed
+  - range: patch
+    # No configured patterns must match to use this indicator
+    strategy: matchNone
+    patterns:
+      - type: fileAdded
+        pattern: '/^src\//'
+      - type: fileDeleted
+        pattern: '/^src\//'
+      - type: fileModified
+        pattern: '/^src\//'
+```
+
+> [!NOTE]
+> The matching version range with the highest priority will be
+> used as final version range (`major` receives the highest priority).
+
+If no version range indicator matches, the `bump-version`
+command will fail.
+
+##### Strategies
+
+The `strategy` config option (see second indicator in the above example)
+defines how matching (or non-matching) patterns are treated to
+mark the whole indicator as "matching".
+
+By default, an indicator matches if any of the configured
+patterns matches (`matchAny`). If all patterns must match,
+`matchAll` can be used.
+
+In some cases, it may be useful to define a version range if
+no pattern matches. This can be achieved by the `matchNone` strategy.
+
+##### Examples
+
+Using the above example, the following version range would result
+if given preconditions are met:
+
+| Commit message                                     | File operations                                                                                  | Matching range                |
+|----------------------------------------------------|--------------------------------------------------------------------------------------------------|-------------------------------|
+| `[!!!][TASK] Drop support for PHP < 8.3`           | *any*                                                                                            | 1️⃣&nbsp;`major`              |
+| *any*                                              | Deleted:&nbsp;`src/Controller/DashboardController.php`<br>Modified:&nbsp;`res/api.schema.json`   | 2️⃣&nbsp;`major`              |
+| `[FEATURE] Add support for PHP 8.4`                | *any*                                                                                            | 3️⃣&nbsp;`minor`              |
+| `[TASK] Use PHP 8.4 in CI`                         | *any*                                                                                            | 4️⃣&nbsp;`patch`              |
+| `[BUGFIX] Avoid implicit nullable types`           | *any*                                                                                            | 4️⃣&nbsp;`patch`              |
+| `[DOCS] Mention PHP 8.4 support in documentation`  | *any*                                                                                            | 4️⃣&nbsp;`patch`              |
+| *any*                                              | Modified:&nbsp;`composer.json`<br>Added:`composer.lock`<br>Deleted:&nbsp;`composer.patches.json` | 5️⃣&nbsp;`patch`              |
+| `[TASK] Remove deprecated dashboard functionality` | Deleted:&nbsp;`src/Controller/DashboardController.php`<br>Modified:&nbsp;`res/api.schema.json`   | 2️⃣&nbsp;`major`<sup>1)</sup> |
+| `[TASK] Remove deprecated dashboard functionality` | Deleted:&nbsp;`src/Controller/DashboardController.php`                                           | 4️⃣&nbsp;`patch`<sup>2)</sup> |
+| `[SECURITY] Avoid XSS in dashboard`                | Modified:&nbsp;`src/Controller/DashboardController.php`                                          | –<sup>3)</sup>                |
+
+*Notes:*
+
+<sup>1)</sup> Even if both indicators 2️⃣ and 4️⃣ match, indicator
+2️⃣ takes precedence because of the higher version range.
+
+<sup>2)</sup> Indicator 2️⃣ does not match, because only one
+pattern matches, and the indicator's strategy is configured
+to match all patterns (`matchAll`).
+
+<sup>3)</sup> No indicator contains patterns for either the
+commit message or modified file, hence no version range is
+detected.
+
+
 ### PHP API
 
+> [!TIP]
+> You can use the method argument `$dryRun` in both
+> `VersionBumper` and `VersionReleaser` classes to skip any
+> write operations (dry-run mode).
+
+#### Bump versions
+
 The main entrypoint of the plugin is the
-[`Version\VersionBumper`](src/Version/VersionBumper.php) class.
+[`Version\VersionBumper`](src/Version/VersionBumper.php) class:
 
 ```php
 use EliasHaeussler\VersionBumper;
@@ -108,6 +234,8 @@ foreach ($results as $result) {
 }
 ```
 
+#### Create release
+
 A release can be created by the
 [`Version\VersionReleaser`](src/Version/VersionReleaser.php) class:
 
@@ -131,10 +259,38 @@ echo sprintf(
 echo PHP_EOL;
 ```
 
-> [!TIP]
-> You can use the method argument `$dryRun` in both
-> `VersionBumper` and `VersionReleaser` classes to skip any
-> write operations (dry-run mode).
+#### Auto-detect version range
+
+When bumping files, a respective version range or explicit version
+must be provided (see above). The library provides a
+[`Version\VersionRangeDetector`](src/Version/VersionRangeDetector.php)
+class to automate this step and auto-detect a version range, based
+on a set of [`Config\VersionRangeIndicator`](src/Config/VersionRangeIndicator.php)
+objects:
+
+```php
+use EliasHaeussler\VersionBumper;
+
+$indicators = [
+    new VersionBumper\Config\VersionRangeIndicator(
+        // Bump major version if any commit contains breaking changes
+        // (commit message starts with "[!!!]")
+        VersionBumper\Enum\VersionRange::Major,
+        [
+            new VersionBumper\Config\VersionRangePattern(
+                VersionBumper\Enum\VersionRangeIndicatorType::CommitMessage,
+                '/^\[!!!]/',
+            ),
+        ],
+    ),
+];
+
+$versionRangeDetector = new VersionBumper\Version\VersionRangeDetector();
+$versionRange = $versionRangeDetector->detect($rootPath, $indicators);
+
+echo sprintf('Auto-detected version range is "%s".', $versionRange->value);
+echo PHP_EOL;
+```
 
 ## 📝 Configuration
 
@@ -160,13 +316,26 @@ filesToModify:
       # Each pattern must contain a {%version%} placeholder
       - '"version": "{%version%}"'
     reportUnmatched: true
+
 releaseOptions:
   commitMessage: '[RELEASE] Release of my-fancy-library {%version%}'
   overwriteExistingTag: true
   signTag: true
   tagName: 'v{%version%}'
+
 # Relative (to config file) or absolute path to project root
 rootPath: ../
+
+versionRangeIndicators:
+  - range: major
+    strategy: matchAll
+    patterns:
+      - type: fileDeleted
+        pattern: '/^src\/Controller\/.+Controller\.php$/'
+      - type: fileModified
+        pattern: '/^res\/api\.schema\.json$/'
+      - type: commitMessage
+        pattern: '/^\[!!!]/'
 ```
 
 > [!TIP]
@@ -176,9 +345,9 @@ rootPath: ../
 
 | Property                          | Type             | Required | Description                                                                                                                                                                                                                                                                       |
 |-----------------------------------|------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `filesToModify`                   | Array of Objects | ✅        | List of files that contain versions which are to be bumped.                                                                                                                                                                                                                       |
+| `filesToModify`                   | Array of objects | ✅        | List of files that contain versions which are to be bumped.                                                                                                                                                                                                                       |
 | `filesToModify.*.path`            | String           | ✅        | Relative or absolute path to the file. Relative paths are calculated from the configured (or calculated) project root.                                                                                                                                                            |
-| `filesToModify.*.patterns`        | Array of Strings | ✅        | List of version patterns to be searched and replaced in the configured file. Each pattern must contain a `{%version%}` placeholder that is replaced by the new version. Patterns are internally converted to regular expressions, so feel free to use regex syntax such as `\s+`. |
+| `filesToModify.*.patterns`        | Array of strings | ✅        | List of version patterns to be searched and replaced in the configured file. Each pattern must contain a `{%version%}` placeholder that is replaced by the new version. Patterns are internally converted to regular expressions, so feel free to use regex syntax such as `\s+`. |
 | `filesToModify.*.reportUnmatched` | Boolean          | –        | Show warning if a configured pattern does not match file contents. Useful in combination with the `--strict` command option.                                                                                                                                                      |
 
 #### Release options
@@ -196,6 +365,17 @@ rootPath: ../
 | Property   | Type   | Required | Description                                                                                                                                                                                                                                         |
 |------------|--------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `rootPath` | String | –        | Relative or absolute path to project root. This path will be used to calculate paths to configured files if they are configured as relative paths. If the root path is configured as relative path, it is calculated based on the config file path. |
+
+#### Version range indicators
+
+| Property                                      | Type             | Required | Description                                                                                         |
+|-----------------------------------------------|------------------|----------|-----------------------------------------------------------------------------------------------------|
+| `versionRangeIndicators`                      | Array of objects | –        | List of indicators to auto-detect a version range to be bumped.                                     |
+| `versionRangeIndicators.*.patterns`           | Array of objects | ✅        | List of version range patterns to match for this indicator.                                         |
+| `versionRangeIndicators.*.patterns.*.pattern` | String           | ✅        | Regular expression to match a specific version range indicator.                                     |
+| `versionRangeIndicators.*.patterns.*.type`    | String (enum)    | ✅        | Type of the pattern to match, can be `commitMessage`, `fileAdded`, `fileDeleted` or `fileModified`. |
+| `versionRangeIndicators.*.range`              | String (enum)    | ✅        | Version range to use when patterns match, can be `major`, `minor`, `next` or `patch`.               |
+| `versionRangeIndicators.*.strategy`           | String (enum)    | –        | Match strategy for configured patterns, can be `matchAll`, `matchAny` (default) or `matchNone`.     |
 
 ### Configuration in `composer.json`
 

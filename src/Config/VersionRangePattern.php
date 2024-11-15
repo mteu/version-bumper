@@ -23,55 +23,28 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Config;
 
+use EliasHaeussler\VersionBumper\Enum;
+
 /**
- * VersionBumperConfig.
+ * VersionRangePattern.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+final class VersionRangePattern
 {
-    /**
-     * @param list<FileToModify>          $filesToModify
-     * @param list<VersionRangeIndicator> $versionRangeIndicators
-     */
     public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-        private readonly array $versionRangeIndicators = [],
+        private readonly Enum\VersionRangeIndicatorType $type,
+        private readonly string $pattern,
     ) {}
 
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
+    public function type(): Enum\VersionRangeIndicatorType
     {
-        return $this->filesToModify;
+        return $this->type;
     }
 
-    public function rootPath(): ?string
+    public function pattern(): string
     {
-        return $this->rootPath;
-    }
-
-    public function setRootPath(string $rootPath): self
-    {
-        $this->rootPath = $rootPath;
-
-        return $this;
-    }
-
-    public function releaseOptions(): ReleaseOptions
-    {
-        return $this->releaseOptions;
-    }
-
-    /**
-     * @return list<VersionRangeIndicator>
-     */
-    public function versionRangeIndicators(): array
-    {
-        return $this->versionRangeIndicators;
+        return $this->pattern;
     }
 }

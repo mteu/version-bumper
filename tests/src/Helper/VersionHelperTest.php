@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Tests\Helper;
 
 use EliasHaeussler\VersionBumper as Src;
+use Generator;
 use PHPUnit\Framework;
 
 /**
@@ -36,6 +37,13 @@ use PHPUnit\Framework;
 final class VersionHelperTest extends Framework\TestCase
 {
     #[Framework\Attributes\Test]
+    #[Framework\Attributes\DataProvider('isValidVersionReturnsTrueIfGivenVersionIsValidDataProvider')]
+    public function isValidVersionReturnsTrueIfGivenVersionIsValid(string $version, bool $expected): void
+    {
+        self::assertSame($expected, Src\Helper\VersionHelper::isValidVersion($version));
+    }
+
+    #[Framework\Attributes\Test]
     public function isValidVersionPatternReturnsTrueIfPatternContainsVersionPlaceholder(): void
     {
         self::assertTrue(Src\Helper\VersionHelper::isValidVersionPattern('foo/foo: {%version%}'));
@@ -46,7 +54,7 @@ final class VersionHelperTest extends Framework\TestCase
     public function convertPatternToRegularExpressionConvertsPatternToRegularExpression(): void
     {
         self::assertSame(
-            '/foo\/foo: (?P<version>\d+\.\d+\.\d+)/',
+            '/foo\/foo: (?P<version>v?\d+\.\d+\.\d+)/',
             Src\Helper\VersionHelper::convertPatternToRegularExpression('foo/foo: {%version%}'),
         );
     }
@@ -60,5 +68,15 @@ final class VersionHelperTest extends Framework\TestCase
             'foo/foo: 1.2.3',
             Src\Helper\VersionHelper::replaceVersionInPattern('foo/foo: {%version%}', $version),
         );
+    }
+
+    /**
+     * @return Generator<string, array{string, bool}>
+     */
+    public static function isValidVersionReturnsTrueIfGivenVersionIsValidDataProvider(): Generator
+    {
+        yield 'valid version' => ['1.2.3', true];
+        yield 'valid version with prefix' => ['v1.2.3', true];
+        yield 'invalid version' => ['1.2.3-beta.1', false];
     }
 }

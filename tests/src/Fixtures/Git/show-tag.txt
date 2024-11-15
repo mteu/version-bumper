@@ -1,0 +1,12 @@
+tag 1.2.0
+Tagger: Elias Häußler <elias@haeussler.dev>
+
+1.2.0
+
+commit 08708bc0b5c07a8233b6510c4677ad3ad112d5d4
+tree 0adc74bafebc6253e39e458d8bdb881b84fa814d
+parent 7050e7825a71f46db04c8575c9608b802b03ccbc
+author Elias Häußler <elias@haeussler.dev> 1727980384 +0200
+committer Elias Häußler <elias@haeussler.dev> 1727980384 +0200
+
+    Hello World!

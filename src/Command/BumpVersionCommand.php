@@ -31,6 +31,7 @@ use EliasHaeussler\VersionBumper\Enum;
 use EliasHaeussler\VersionBumper\Exception;
 use EliasHaeussler\VersionBumper\Result;
 use EliasHaeussler\VersionBumper\Version;
+use GitElephant\Command\Caller;
 use Symfony\Component\Console;
 use Symfony\Component\Filesystem;
 
@@ -54,11 +55,14 @@ final class BumpVersionCommand extends Command\BaseCommand
 {
     private readonly Version\VersionBumper $bumper;
     private readonly Config\ConfigReader $configReader;
+    private readonly Version\VersionRangeDetector $versionRangeDetector;
     private readonly Version\VersionReleaser $releaser;
     private Console\Style\SymfonyStyle $io;
 
-    public function __construct(?Composer $composer = null)
-    {
+    public function __construct(
+        ?Composer $composer = null,
+        ?Caller\CallerInterface $caller = null,
+    ) {
         if (null !== $composer) {
             $this->setComposer($composer);
         }
@@ -67,7 +71,8 @@ final class BumpVersionCommand extends Command\BaseCommand
 
         $this->bumper = new Version\VersionBumper();
         $this->configReader = new Config\ConfigReader();
-        $this->releaser = new Version\VersionReleaser();
+        $this->versionRangeDetector = new Version\VersionRangeDetector($caller);
+        $this->releaser = new Version\VersionReleaser($caller);
     }
 
     protected function configure(): void
@@ -77,7 +82,7 @@ final class BumpVersionCommand extends Command\BaseCommand
 
         $this->addArgument(
             'range',
-            Console\Input\InputArgument::REQUIRED,
+            Console\Input\InputArgument::OPTIONAL,
             sprintf(
                 'Version range (one of "%s") or explicit version to bump in configured files',
                 implode('", "', Enum\VersionRange::all()),
@@ -169,18 +174,38 @@ final class BumpVersionCommand extends Command\BaseCommand
     /**
      * @return array{Config\VersionBumperConfig, list<Result\VersionBumpResult>}|null
      */
-    private function bumpVersions(string $configFile, string $rangeOrVersion, string $rootPath, bool $dryRun): ?array
+    private function bumpVersions(string $configFile, ?string $rangeOrVersion, string $rootPath, bool $dryRun): ?array
     {
         try {
             $config = $this->configReader->readFromFile($configFile);
-            $versionRange = Enum\VersionRange::tryFromInput($rangeOrVersion);
+            $finalRootPath = $config->rootPath() ?? $rootPath;
+            $versionRange = null;
 
-            $results = $this->bumper->bump(
-                $config->filesToModify(),
-                $config->rootPath() ?? $rootPath,
-                $versionRange ?? $rangeOrVersion,
-                $dryRun,
-            );
+            // Auto-detect version range from indicators
+            if (null !== $rangeOrVersion) {
+                $versionRange = Enum\VersionRange::tryFromInput($rangeOrVersion) ?? $rangeOrVersion;
+            } elseif ([] !== $config->versionRangeIndicators()) {
+                $versionRange = $this->versionRangeDetector->detect($finalRootPath, $config->versionRangeIndicators());
+            } else {
+                $this->io->error('Please provide a version range or explicit version to bump in configured files.');
+                $this->io->block(
+                    'You can also enable auto-detection by adding version range indicators to your configuration file.',
+                    null,
+                    'fg=cyan',
+                    '💡 ',
+                );
+
+                return null;
+            }
+
+            // Exit early if version range detection fails
+            if (null === $versionRange) {
+                $this->io->error('Unable to auto-detect version range. Please provide a version range or explicit version instead.');
+
+                return null;
+            }
+
+            $results = $this->bumper->bump($config->filesToModify(), $finalRootPath, $versionRange, $dryRun);
 
             $this->decorateVersionBumpResults($results, $rootPath);
 

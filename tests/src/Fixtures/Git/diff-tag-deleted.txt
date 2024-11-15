@@ -1,0 +1,7 @@
+diff --git SRC/README.md DST/README.md
+deleted file mode 100644
+index cc0be1e56dcbe29142bf4b97265a19afa1698e44..0000000000000000000000000000000000000000
+--- SRC/README.md
++++ /dev/null
+@@ -1 +0,0 @@
+-# Hello World!

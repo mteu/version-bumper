@@ -26,6 +26,7 @@ namespace EliasHaeussler\VersionBumper\Helper;
 use EliasHaeussler\VersionBumper\Version;
 
 use function addcslashes;
+use function preg_match;
 use function str_contains;
 use function str_replace;
 
@@ -40,7 +41,12 @@ use function str_replace;
 final class VersionHelper
 {
     private const VERSION_PLACEHOLDER = '{%version%}';
-    private const VERSION_REGEX = '(?P<version>\\d+\\.\\d+\\.\\d+)';
+    private const VERSION_REGEX = '(?P<version>v?\\d+\\.\\d+\\.\\d+)';
+
+    public static function isValidVersion(string $version): bool
+    {
+        return 1 === preg_match('/^'.self::VERSION_REGEX.'$/', $version);
+    }
 
     public static function isValidVersionPattern(string $pattern): bool
     {

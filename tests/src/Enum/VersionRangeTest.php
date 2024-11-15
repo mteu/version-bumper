@@ -89,6 +89,24 @@ final class VersionRangeTest extends Framework\TestCase
         self::assertSame($expected, Src\Enum\VersionRange::all());
     }
 
+    #[Framework\Attributes\Test]
+    public function getHighesReturnsEmptyArrayIfNoVersionRangesAreGiven(): void
+    {
+        self::assertNull(Src\Enum\VersionRange::getHighest());
+    }
+
+    /**
+     * @param list<Src\Enum\VersionRange> $ranges
+     */
+    #[Framework\Attributes\Test]
+    #[Framework\Attributes\DataProvider('getHighestReturnsVersionRangeWithHighestPriorityDataProvider')]
+    public function getHighestReturnsVersionRangeWithHighestPriority(
+        array $ranges,
+        Src\Enum\VersionRange $expected,
+    ): void {
+        self::assertSame($expected, Src\Enum\VersionRange::getHighest(...$ranges));
+    }
+
     /**
      * @return Generator<string, array{string, Src\Enum\VersionRange}>
      */
@@ -109,5 +127,21 @@ final class VersionRangeTest extends Framework\TestCase
         yield 'minor' => ['minor', Src\Enum\VersionRange::Minor];
         yield 'next' => ['next', Src\Enum\VersionRange::Next];
         yield 'patch' => ['patch', Src\Enum\VersionRange::Patch];
+    }
+
+    /**
+     * @return Generator<string, array{list<Src\Enum\VersionRange>, Src\Enum\VersionRange}>
+     */
+    public static function getHighestReturnsVersionRangeWithHighestPriorityDataProvider(): Generator
+    {
+        $major = Src\Enum\VersionRange::Major;
+        $minor = Src\Enum\VersionRange::Minor;
+        $next = Src\Enum\VersionRange::Next;
+        $patch = Src\Enum\VersionRange::Patch;
+
+        yield 'major' => [[$next, $major, $patch, $minor], $major];
+        yield 'minor' => [[$next, $minor, $patch], $minor];
+        yield 'next' => [[$next, $patch, $next], $next];
+        yield 'patch' => [[$next, $next, $patch], $patch];
     }
 }
