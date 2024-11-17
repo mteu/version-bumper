@@ -17,6 +17,13 @@
 			"type": "string",
 			"title": "Relative or absolute path to project root",
 			"description": "This path will be used to calculate paths to configured files if they are configured as relative paths. If the root path is configured as relative path, it is calculated based on the config file path."
+		},
+		"versionRangeIndicators": {
+			"type": "array",
+			"title": "List of indicators to automatically determine version range",
+			"items": {
+				"$ref": "#/definitions/versionRangeIndicator"
+			}
 		}
 	},
 	"additionalProperties": false,
@@ -76,11 +83,77 @@
 					"description": "Must contain a `{%version%}` placeholder that is replaced by the version to release.",
 					"$ref": "#/definitions/versionPattern"
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"versionPattern": {
 			"type": "string",
 			"pattern": "\\{%version%\\}"
+		},
+		"versionRange": {
+			"type": "string",
+			"enum": [
+				"major",
+				"minor",
+				"next",
+				"patch"
+			]
+		},
+		"versionRangeIndicator": {
+			"type": "object",
+			"title": "Indicator to use a specific version range for the new version to bump",
+			"properties": {
+				"patterns": {
+					"type": "array",
+					"title": "List of version range patterns to match for this indicator",
+					"items": {
+						"$ref": "#/definitions/versionRangePattern"
+					}
+				},
+				"range": {
+					"$ref": "#/definitions/versionRange"
+				},
+				"strategy": {
+					"type": "string",
+					"title": "Match strategy for configured patterns",
+					"enum": [
+						"matchAll",
+						"matchAny",
+						"matchNone"
+					],
+					"default": "matchAny"
+				}
+			},
+			"additionalProperties": false,
+			"required": [
+				"patterns",
+				"range"
+			]
+		},
+		"versionRangePattern": {
+			"type": "object",
+			"title": "Pattern to indicate a specific version range",
+			"properties": {
+				"pattern": {
+					"type": "string",
+					"title": "Regular expression to match a specific version range indicator"
+				},
+				"type": {
+					"type": "string",
+					"title": "Type of the pattern to match",
+					"enum": [
+						"commitMessage",
+						"fileAdded",
+						"fileDeleted",
+						"fileModified"
+					]
+				}
+			},
+			"additionalProperties": false,
+			"required": [
+				"pattern",
+				"type"
+			]
 		}
 	}
 }

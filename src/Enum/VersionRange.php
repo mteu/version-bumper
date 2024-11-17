@@ -25,9 +25,11 @@ namespace EliasHaeussler\VersionBumper\Enum;
 
 use EliasHaeussler\VersionBumper\Exception;
 
+use function array_pop;
 use function array_search;
 use function in_array;
 use function strtolower;
+use function usort;
 
 /**
  * VersionRange.
@@ -89,5 +91,25 @@ enum VersionRange: string
         }
 
         return $all;
+    }
+
+    public static function getHighest(self ...$ranges): ?self
+    {
+        if ([] === $ranges) {
+            return null;
+        }
+
+        usort($ranges, static fn (self $a, self $b) => $a->getPriority() <=> $b->getPriority());
+
+        return array_pop($ranges);
+    }
+
+    private function getPriority(): int
+    {
+        return match ($this) {
+            self::Major => 3,
+            self::Minor => 2,
+            self::Patch, self::Next => 1,
+        };
     }
 }

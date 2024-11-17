@@ -37,7 +37,7 @@ use function preg_match;
  */
 final class Version implements Stringable
 {
-    private const VERSION_PATTERN = '/^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$/';
+    private const VERSION_PATTERN = '/^v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$/';
 
     public function __construct(
         private readonly int $major,

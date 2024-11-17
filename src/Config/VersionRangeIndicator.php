@@ -23,55 +23,40 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Config;
 
+use EliasHaeussler\VersionBumper\Enum;
+
 /**
- * VersionBumperConfig.
+ * VersionRangeIndicator.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumperConfig
+final class VersionRangeIndicator
 {
     /**
-     * @param list<FileToModify>          $filesToModify
-     * @param list<VersionRangeIndicator> $versionRangeIndicators
+     * @param list<VersionRangePattern> $patterns
      */
     public function __construct(
-        private readonly array $filesToModify = [],
-        private ?string $rootPath = null,
-        private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
-        private readonly array $versionRangeIndicators = [],
+        private readonly Enum\VersionRange $range,
+        private readonly array $patterns,
+        private readonly Enum\VersionRangeIndicatorStrategy $strategy = Enum\VersionRangeIndicatorStrategy::MatchAny,
     ) {}
 
-    /**
-     * @return list<FileToModify>
-     */
-    public function filesToModify(): array
+    public function range(): Enum\VersionRange
     {
-        return $this->filesToModify;
-    }
-
-    public function rootPath(): ?string
-    {
-        return $this->rootPath;
-    }
-
-    public function setRootPath(string $rootPath): self
-    {
-        $this->rootPath = $rootPath;
-
-        return $this;
-    }
-
-    public function releaseOptions(): ReleaseOptions
-    {
-        return $this->releaseOptions;
+        return $this->range;
     }
 
     /**
-     * @return list<VersionRangeIndicator>
+     * @return list<VersionRangePattern>
      */
-    public function versionRangeIndicators(): array
+    public function patterns(): array
     {
-        return $this->versionRangeIndicators;
+        return $this->patterns;
+    }
+
+    public function strategy(): Enum\VersionRangeIndicatorStrategy
+    {
+        return $this->strategy;
     }
 }

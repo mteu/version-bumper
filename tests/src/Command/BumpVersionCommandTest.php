@@ -28,11 +28,13 @@ use Composer\Console\Application;
 use Composer\Factory;
 use Composer\IO\NullIO;
 use EliasHaeussler\VersionBumper as Src;
+use EliasHaeussler\VersionBumper\Tests;
 use PHPUnit\Framework;
 use Symfony\Component\Console;
 
 use function chdir;
 use function dirname;
+use function file_get_contents;
 use function getcwd;
 
 /**
@@ -44,10 +46,12 @@ use function getcwd;
 #[Framework\Attributes\CoversClass(Src\Command\BumpVersionCommand::class)]
 final class BumpVersionCommandTest extends Framework\TestCase
 {
+    private Tests\Fixtures\Classes\DummyCaller $caller;
     private Console\Tester\CommandTester $commandTester;
 
     public function setUp(): void
     {
+        $this->caller = new Tests\Fixtures\Classes\DummyCaller();
         $this->commandTester = $this->createCommandTester();
     }
 
@@ -156,6 +160,98 @@ final class BumpVersionCommandTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
+    public function executeFailsIfVersionRangeIsOmitted(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';
+
+        $this->commandTester->execute([
+            '--config' => $configFile,
+        ]);
+
+        self::assertSame(Console\Command\Command::FAILURE, $this->commandTester->getStatusCode());
+        self::assertStringContainsString(
+            'Please provide a version range or explicit version to bump in configured files.',
+            $this->commandTester->getDisplay(),
+        );
+    }
+
+    #[Framework\Attributes\Test]
+    public function executeAutoDetectsVersionRangeIfVersionRangeIsOmitted(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-indicators.json';
+
+        $commit = (string) file_get_contents(dirname(__DIR__).'/Fixtures/Git/log-commit.txt');
+        $tag = (string) file_get_contents(dirname(__DIR__).'/Fixtures/Git/show-tag.txt');
+        $diff = (string) file_get_contents(dirname(__DIR__).'/Fixtures/Git/diff-tag-added.txt');
+
+        $this->caller->results = [
+            ['1.2.0', 'tag'],
+            ['1.2.0', 'tag'],
+            ['08708bc0b5c07a8233b6510c4677ad3ad112d5d4', "rev-list '-n1' 'refs/tags/1.2.0'"],
+            [$commit, "log '-s' '--pretty=raw' '--no-color' '--max-count=-1' '--skip=0' 'refs/tags/1.2.0..HEAD'"],
+            [$tag, "show '-s' '--pretty=raw' '--no-color' '1.2.0'"],
+            [$diff, "diff '--full-index' '--no-color' '--no-ext-diff' '-M' '--dst-prefix=DST/' '--src-prefix=SRC/' '08708bc0b5c07a8233b6510c4677ad3ad112d5d4^..08708bc0b5c07a8233b6510c4677ad3ad112d5d4'"],
+        ];
+
+        $this->commandTester->execute([
+            '--config' => $configFile,
+            '--dry-run' => true,
+        ]);
+
+        self::assertSame(Console\Command\Command::SUCCESS, $this->commandTester->getStatusCode());
+        self::assertStringContainsString('Bumped version from "1.0.0" to "2.0.0"', $this->commandTester->getDisplay());
+    }
+
+    #[Framework\Attributes\Test]
+    public function executeFailsIfVersionRangeAutoDetectionCouldNotFindTags(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-indicators.json';
+
+        $this->caller->results = [
+            ['', 'tag'],
+        ];
+
+        $this->commandTester->execute([
+            '--config' => $configFile,
+        ]);
+
+        self::assertSame(Console\Command\Command::FAILURE, $this->commandTester->getStatusCode());
+        self::assertStringContainsString(
+            'Could not find any Git tags in the repository.',
+            $this->commandTester->getDisplay(),
+        );
+    }
+
+    #[Framework\Attributes\Test]
+    public function executeFailsIfNoIndicatorsForVersionRangeAutoDetectionMatch(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-indicators.json';
+
+        $commit = (string) file_get_contents(dirname(__DIR__).'/Fixtures/Git/log-commit.txt');
+        $tag = (string) file_get_contents(dirname(__DIR__).'/Fixtures/Git/show-tag.txt');
+        $diff = (string) file_get_contents(dirname(__DIR__).'/Fixtures/Git/diff-tag-deleted.txt');
+
+        $this->caller->results = [
+            ['1.2.0', 'tag'],
+            ['1.2.0', 'tag'],
+            ['08708bc0b5c07a8233b6510c4677ad3ad112d5d4', "rev-list '-n1' 'refs/tags/1.2.0'"],
+            [$commit, "log '-s' '--pretty=raw' '--no-color' '--max-count=-1' '--skip=0' 'refs/tags/1.2.0..HEAD'"],
+            [$tag, "show '-s' '--pretty=raw' '--no-color' '1.2.0'"],
+            [$diff, "diff '--full-index' '--no-color' '--no-ext-diff' '-M' '--dst-prefix=DST/' '--src-prefix=SRC/' '08708bc0b5c07a8233b6510c4677ad3ad112d5d4^..08708bc0b5c07a8233b6510c4677ad3ad112d5d4'"],
+        ];
+
+        $this->commandTester->execute([
+            '--config' => $configFile,
+        ]);
+
+        self::assertSame(Console\Command\Command::FAILURE, $this->commandTester->getStatusCode());
+        self::assertStringContainsString(
+            'Unable to auto-detect version range.',
+            $this->commandTester->getDisplay(),
+        );
+    }
+
+    #[Framework\Attributes\Test]
     public function executeDecoratesVersionBumpResult(): void
     {
         $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';
@@ -180,6 +276,12 @@ final class BumpVersionCommandTest extends Framework\TestCase
     public function executeFailsIfNoVersionToReleaseIsGiven(): void
     {
         $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';
+
+        $this->caller->results = [
+            ['1.0.0', 'tag'],
+            ['1.0.0', 'tag'],
+            ['08708bc0b5c07a8233b6510c4677ad3ad112d5d4', "rev-list '-n1' 'refs/tags/1.0.0'"],
+        ];
 
         $this->commandTester->execute([
             'range' => '1.0.0',
@@ -234,10 +336,15 @@ final class BumpVersionCommandTest extends Framework\TestCase
         self::assertStringContainsString('Bumped version from "2.0.0" to "1.0.0"', $output);
     }
 
+    protected function tearDown(): void
+    {
+        $this->caller->results = [];
+    }
+
     private function createCommandTester(?Composer $composer = null): Console\Tester\CommandTester
     {
         $application = new Application();
-        $command = new Src\Command\BumpVersionCommand($composer);
+        $command = new Src\Command\BumpVersionCommand($composer, $this->caller);
         $command->setApplication($application);
 
         return new Console\Tester\CommandTester($command);

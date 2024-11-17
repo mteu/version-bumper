@@ -1,0 +1,22 @@
+{
+	"filesToModify": [
+		{
+			"path": "tests/src/Fixtures/RootPath/foo",
+			"patterns": [
+				"baz: {%version%}"
+			]
+		}
+	],
+	"rootPath": "../../../..",
+	"versionRangeIndicators": [
+		{
+			"range": "major",
+			"patterns": [
+				{
+					"type": "fileAdded",
+					"pattern": "/.+/"
+				}
+			]
+		}
+	]
+}
