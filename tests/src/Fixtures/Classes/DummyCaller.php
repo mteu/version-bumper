@@ -55,7 +55,7 @@ final class DummyCaller extends Command\Caller\AbstractCaller
             return $this;
         }
 
-        [$result, $expectedCommand] = $result;
+        [$outputOrException, $expectedCommand] = $result;
 
         if ($expectedCommand !== $cmd) {
             Assert::fail(
@@ -63,12 +63,12 @@ final class DummyCaller extends Command\Caller\AbstractCaller
             );
         }
 
-        if ($result instanceof Throwable) {
-            throw $result;
+        if ($outputOrException instanceof Throwable) {
+            throw $outputOrException;
         }
 
-        $this->rawOutput = $result;
-        $this->outputLines = array_map('rtrim', explode(PHP_EOL, $result));
+        $this->rawOutput = $outputOrException;
+        $this->outputLines = array_map('rtrim', explode(PHP_EOL, $outputOrException));
 
         return $this;
     }

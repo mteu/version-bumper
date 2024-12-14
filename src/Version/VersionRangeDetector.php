@@ -144,6 +144,7 @@ final class VersionRangeDetector
     private function fetchLatestVersionTag(Repository $repository): ?Objects\Tag
     {
         try {
+            /** @var list<Objects\Tag> $tags */
             $tags = $repository->getTags();
         } catch (\Exception) {
             throw new Exception\CannotFetchLatestGitTag();
