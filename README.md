@@ -56,6 +56,52 @@ Pass the following options to the console command:
   calculate and display version bumps.
 * `--strict`: Fail if any unmatched file pattern is reported.
 
+#### Presets
+
+Config presets can be used to ship preconfigured configuration
+for specific project types. When using presets in your config
+file, the resulting config will be merged with your main config
+object.
+
+Presets are identified by a name and can be customized by preset
+options. The available options differ between presets.
+
+##### Available presets
+
+* **Composer package**
+  - Identifier: `composer-package`
+  - Options:
+    + `path` (string, optional): Directory where `composer.json`
+      is located, defaults to current directory.
+* **NPM package**
+  - Identifier: `npm-package`
+  - Options:
+    + `packageName` (string, required): Name of the package as
+      configured in `package.json`.
+    + `path` (string, optional): Directory where `package.json`
+      is located, defaults to current directory.
+* **TYPO3 extension**
+  - Identifier: `typo3-extension`
+  - Options:
+    + `documentation` (boolean, optional): Define whether or not
+      a ReST documentation is used in the extension.
+
+##### Example
+
+```yaml
+presets:
+  # Short syntax, only identifier is provided
+  - composer-package
+
+  # Extended syntax, identifier and options are provided
+  - name: npm-package
+    options:
+      packageName: '@vendor/my-fancy-library'
+
+  # Extended syntax, but without options (not practically relevant, but possible)
+  - name: typo3-extension
+```
+
 #### Version range auto-detection
 
 Normally, an explicit version range or version is passed to
@@ -310,6 +356,12 @@ The following file formats are supported currently:
 The config file must follow a given schema:
 
 ```yaml
+presets:
+  - composer-package
+  - name: npm-package
+    options:
+      packageName: '@vendor/my-fancy-library'
+
 filesToModify:
   - path: relative/or/absolute/path/to/file
     patterns:
@@ -340,6 +392,18 @@ versionRangeIndicators:
 
 > [!TIP]
 > Have a look at the shipped [JSON schema](res/version-bumper.schema.json).
+
+#### Presets
+
+| Property            | Type                     | Required       | Description                                                                                                                  |
+|---------------------|--------------------------|----------------|------------------------------------------------------------------------------------------------------------------------------|
+| `presets`           | Array of objects/strings | –              | List of config presets to apply (read more at [Presets](#presets)).                                                          |
+| `presets.*`         | String                   | ✅<sup>1)</sup> | Preset identifier, can be used when no additional options are to be configured. Otherwise, take a look at the next property. |
+| `presets.*.name`    | String                   | ✅<sup>1)</sup> | Preset identifier, can be used when additional options are to be configured (see next property).                             |
+| `presets.*.options` | Object                   | ✅<sup>1)</sup> | Additional preset options. The available options differ from preset to preset.                                               |
+
+<sup>1)</sup> You can either configure presets using string syntax (provide the
+preset identifier only) or using object syntax (provide identifier and options).
 
 #### Files to modify
 

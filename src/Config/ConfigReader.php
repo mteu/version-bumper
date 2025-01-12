@@ -76,6 +76,10 @@ final class ConfigReader
             );
         }
 
+        foreach ($config->presets() as $preset) {
+            $config = $config->merge($preset->getConfig());
+        }
+
         return $config;
     }
 
@@ -116,7 +120,14 @@ final class ConfigReader
 
     private function createMapper(): Valinor\Mapper\TreeMapper
     {
+        $presetFactory = new Preset\PresetFactory();
+
         return (new Valinor\MapperBuilder())
+            ->registerConstructor(
+                $presetFactory->get(...),
+                static fn (string $name): Preset\Preset => $presetFactory->get($name),
+            )
+            ->allowPermissiveTypes()
             ->mapper()
         ;
     }

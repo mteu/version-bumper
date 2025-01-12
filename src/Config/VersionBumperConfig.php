@@ -23,6 +23,11 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Config;
 
+use ReflectionObject;
+
+use function array_merge;
+use function is_array;
+
 /**
  * VersionBumperConfig.
  *
@@ -34,13 +39,23 @@ final class VersionBumperConfig
     /**
      * @param list<FileToModify>          $filesToModify
      * @param list<VersionRangeIndicator> $versionRangeIndicators
+     * @param list<Preset\Preset>         $presets
      */
     public function __construct(
+        private readonly array $presets = [],
         private readonly array $filesToModify = [],
         private ?string $rootPath = null,
         private readonly ReleaseOptions $releaseOptions = new ReleaseOptions(),
         private readonly array $versionRangeIndicators = [],
     ) {}
+
+    /**
+     * @return list<Preset\Preset>
+     */
+    public function presets(): array
+    {
+        return $this->presets;
+    }
 
     /**
      * @return list<FileToModify>
@@ -73,5 +88,37 @@ final class VersionBumperConfig
     public function versionRangeIndicators(): array
     {
         return $this->versionRangeIndicators;
+    }
+
+    /**
+     * @impure
+     *
+     * @internal
+     */
+    public function merge(self $other): self
+    {
+        $shell = new self();
+        $reflection = new ReflectionObject($other);
+        $parameters = $reflection->getConstructor()?->getParameters() ?? [];
+        $properties = [];
+
+        foreach ($parameters as $parameter) {
+            $property = $reflection->getProperty($parameter->getName());
+            $thisValue = $property->getValue($this);
+            $otherValue = $property->getValue($other);
+
+            /* @phpstan-ignore notEqual.notAllowed (Loose comparison is intended as we compare objects) */
+            if ($property->getValue($shell) != $otherValue) {
+                $thisValue = is_array($thisValue) && is_array($otherValue)
+                    ? array_merge($thisValue, $otherValue)
+                    : $otherValue
+                ;
+            }
+
+            $properties[] = $thisValue;
+        }
+
+        /* @phpstan-ignore argument.type */
+        return new self(...$properties);
     }
 }
