@@ -37,7 +37,7 @@ use function preg_match;
  */
 final class Version implements Stringable
 {
-    private const VERSION_PATTERN = '/^v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$/';
+    private const VERSION_PATTERN = '/^v?(?P<major>0|[1-9]+)\.(?P<minor>0|[1-9]+)\.(?P<patch>0|[1-9]+)$/';
 
     public function __construct(
         private readonly int $major,
@@ -59,6 +59,16 @@ final class Version implements Stringable
 
     public function increase(Enum\VersionRange $range): self
     {
+        // Unstable versions (< 1.0.0) are handled differently:
+        // - Major => Second version number
+        // - Minor => Third version number
+        if (0 === $this->major) {
+            $range = match ($range) {
+                Enum\VersionRange::Major => Enum\VersionRange::Minor,
+                default => Enum\VersionRange::Patch,
+            };
+        }
+
         [$major, $minor, $patch] = match ($range) {
             Enum\VersionRange::Major => [$this->major + 1, 0, 0],
             Enum\VersionRange::Minor => [$this->major, $this->minor + 1, 0],
