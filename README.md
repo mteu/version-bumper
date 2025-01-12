@@ -92,8 +92,11 @@ options. The available options differ between presets.
 * **TYPO3 extension**
   - Identifier: `typo3-extension`
   - Options:
-    + `documentation` (boolean, optional): Define whether or not
-      a ReST documentation is used in the extension.
+    + `documentation` (boolean or `auto` keyword, optional): Define
+      whether or not a ReST documentation is used in the extension.
+      By default or if keyword `auto` is used, ReST documentation
+      version may be replaced, if existent, but version bumping will
+      not fail if a ReST documentation does not exist.
 
 ##### Example
 

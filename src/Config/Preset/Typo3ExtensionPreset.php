@@ -32,10 +32,12 @@ use Symfony\Component\OptionsResolver;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  *
- * @extends BasePreset<array{documentation: bool}>
+ * @extends BasePreset<array{documentation: 'auto'|bool}>
  */
 final class Typo3ExtensionPreset extends BasePreset
 {
+    private const AUTO_KEYWORD = 'auto';
+
     public function __construct(array $options = [])
     {
         $this->options = $this->resolveOptions($options);
@@ -53,13 +55,14 @@ final class Typo3ExtensionPreset extends BasePreset
             ),
         ];
 
-        if ($this->options['documentation']) {
+        if (false !== $this->options['documentation']) {
             $filesToModify[] = new Config\FileToModify(
                 'Documentation/guides.xml',
                 [
                     new Config\FilePattern('release="{%version%}"'),
                 ],
                 true,
+                self::AUTO_KEYWORD !== $this->options['documentation'],
             );
         }
 
@@ -80,8 +83,8 @@ final class Typo3ExtensionPreset extends BasePreset
     {
         $optionsResolver = new OptionsResolver\OptionsResolver();
         $optionsResolver->define('documentation')
-            ->allowedTypes('bool')
-            ->default(false)
+            ->allowedValues(self::AUTO_KEYWORD, true, false)
+            ->default(self::AUTO_KEYWORD)
         ;
 
         return $optionsResolver;
