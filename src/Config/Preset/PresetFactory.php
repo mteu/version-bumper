@@ -37,6 +37,7 @@ final class PresetFactory
         ComposerPackagePreset::class,
         NpmPackagePreset::class,
         Typo3ExtensionPreset::class,
+        Typo3CommitGuidelinesPreset::class,
     ];
 
     /**

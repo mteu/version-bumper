@@ -147,6 +147,20 @@
 						"name": {
 							"type": "string",
 							"enum": [
+								"typo3-commit-guidelines"
+							]
+						}
+					},
+					"additionalProperties": false,
+					"required": [
+						"name"
+					]
+				},
+				{
+					"properties": {
+						"name": {
+							"type": "string",
+							"enum": [
 								"typo3-extension"
 							]
 						},
@@ -185,6 +199,7 @@
 			"description": "Configuration for presets which do not have required preset options",
 			"enum": [
 				"composer-package",
+				"typo3-commit-guidelines",
 				"typo3-extension"
 			]
 		},

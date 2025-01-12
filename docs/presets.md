@@ -12,11 +12,15 @@ options. The available options differ between presets.
 
 ### Composer package (`composer-package`)
 
+Preset for Composer packages managed by a `composer.json` file.
+
 | Option | Type   | Required | Description                                                                |
 |--------|--------|----------|----------------------------------------------------------------------------|
 | `path` | String | –        | Directory where `composer.json` is located, defaults to current directory. |
 
 ### NPM package (`npm-package`)
+
+Preset for NPM packages managed by a `package.json` file.
 
 | Option        | Type   | Required | Description                                                               |
 |---------------|--------|----------|---------------------------------------------------------------------------|
@@ -25,6 +29,9 @@ options. The available options differ between presets.
 
 ### TYPO3 extension (`typo3-extension`)
 
+Preset for legacy or public TYPO3 extensions managed by an
+`ext_emconf.php` file.
+
 | Option          | Type                                   | Required | Description                                                          |
 |-----------------|----------------------------------------|----------|----------------------------------------------------------------------|
 | `documentation` | Boolean or `auto` keyword<sup>1)</sup> | –        | Define whether or not a ReST documentation is used in the extension. |
@@ -32,6 +39,11 @@ options. The available options differ between presets.
 <sup>1)</sup> By default or if keyword `auto` is used, ReST documentation
 version may be replaced, if existent, but version bumping will not fail if
 a ReST documentation does not exist.
+
+### TYPO3 commit guidelines (`typo3-commit-guidelines`)
+
+Preset for TYPO3 projects which adhere to the
+[Commit Message rules for TYPO3 CMS](https://docs.typo3.org/m/typo3/guide-contributionworkflow/main/en-us/Appendix/CommitMessage.html).
 
 ## Example
 
