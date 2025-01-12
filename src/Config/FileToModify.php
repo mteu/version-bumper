@@ -50,6 +50,7 @@ final class FileToModify
         private readonly string $path,
         array $patterns = [],
         private readonly bool $reportUnmatched = false,
+        private readonly bool $reportMissing = true,
     ) {
         foreach ($patterns as $pattern) {
             $this->add($pattern);
@@ -95,5 +96,10 @@ final class FileToModify
     public function reportUnmatched(): bool
     {
         return $this->reportUnmatched;
+    }
+
+    public function reportMissing(): bool
+    {
+        return $this->reportMissing;
     }
 }

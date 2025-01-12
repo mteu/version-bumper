@@ -64,7 +64,13 @@
 				},
 				"reportUnmatched": {
 					"type": "boolean",
-					"title": "Show warning if a configured pattern does not match file contents"
+					"title": "Show warning if a configured pattern does not match file contents",
+					"default": false
+				},
+				"reportMissing": {
+					"type": "boolean",
+					"title": "Fail if file to modify does not exist",
+					"default": true
 				}
 			},
 			"additionalProperties": false,

@@ -28,8 +28,8 @@ use EliasHaeussler\VersionBumper\Enum;
 use EliasHaeussler\VersionBumper\Exception;
 use EliasHaeussler\VersionBumper\Result;
 
-use function file_exists;
 use function file_put_contents;
+use function is_file;
 use function preg_match_all;
 use function strlen;
 use function substr_replace;
@@ -87,7 +87,12 @@ final class VersionBumper
     ): Result\VersionBumpResult {
         $path = $file->fullPath($rootPath);
 
-        if (!file_exists($path)) {
+        if (!is_file($path)) {
+            // Early return if missing file should not be reported
+            if (!$file->reportMissing()) {
+                return new Result\VersionBumpResult($file, []);
+            }
+
             throw new Exception\FileDoesNotExist($path);
         }
 
