@@ -43,6 +43,34 @@ final class Typo3ExtensionPresetTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
+    public function getConfigAllowsSpecialAutoKeywordForDocumentation(): void
+    {
+        $subject = new Src\Config\Preset\Typo3ExtensionPreset(['documentation' => 'auto']);
+
+        $expected = new Src\Config\VersionBumperConfig(
+            filesToModify: [
+                new Src\Config\FileToModify(
+                    'ext_emconf.php',
+                    [
+                        new Src\Config\FilePattern("'version' => '{%version%}'"),
+                    ],
+                    true,
+                ),
+                new Src\Config\FileToModify(
+                    'Documentation/guides.xml',
+                    [
+                        new Src\Config\FilePattern('release="{%version%}"'),
+                    ],
+                    true,
+                    false,
+                ),
+            ],
+        );
+
+        self::assertEquals($expected, $subject->getConfig());
+    }
+
+    #[Framework\Attributes\Test]
     public function getConfigReturnsResolvedConfig(): void
     {
         $expected = new Src\Config\VersionBumperConfig(

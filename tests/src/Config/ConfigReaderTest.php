@@ -306,6 +306,14 @@ final class ConfigReaderTest extends Framework\TestCase
                         ],
                         true,
                     ),
+                    new Src\Config\FileToModify(
+                        'Documentation/guides.xml',
+                        [
+                            'release="{%version%}"',
+                        ],
+                        true,
+                        false,
+                    ),
                 ],
                 $rootPath,
             ),

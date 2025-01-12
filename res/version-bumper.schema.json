@@ -154,9 +154,19 @@
 							"type": "object",
 							"properties": {
 								"documentation": {
-									"type": "boolean",
+									"oneOf": [
+										{
+											"type": "boolean"
+										},
+										{
+											"type": "string",
+											"enum": [
+												"auto"
+											]
+										}
+									],
 									"title": "Define whether extension has a ReST documentation",
-									"default": false
+									"default": "auto"
 								}
 							},
 							"additionalProperties": false
