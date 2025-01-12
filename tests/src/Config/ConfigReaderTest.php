@@ -25,6 +25,7 @@ namespace EliasHaeussler\VersionBumper\Tests\Config;
 
 use CuyZ\Valinor\Mapper\MappingError;
 use EliasHaeussler\VersionBumper as Src;
+use Generator;
 use PHPUnit\Framework;
 use Symfony\Component\Filesystem\Path;
 
@@ -85,7 +86,7 @@ final class ConfigReaderTest extends Framework\TestCase
         $file = $rootPath.'/ConfigFiles/valid-config.json';
 
         $expected = new Src\Config\VersionBumperConfig(
-            [
+            filesToModify: [
                 new Src\Config\FileToModify(
                     'foo',
                     [
@@ -93,7 +94,7 @@ final class ConfigReaderTest extends Framework\TestCase
                     ],
                 ),
             ],
-            $rootPath,
+            rootPath: $rootPath,
         );
 
         self::assertEquals($expected, $this->subject->readFromFile($file));
@@ -118,7 +119,7 @@ final class ConfigReaderTest extends Framework\TestCase
         $file = $rootPath.'/ConfigFiles/valid-config.yaml';
 
         $expected = new Src\Config\VersionBumperConfig(
-            [
+            filesToModify: [
                 new Src\Config\FileToModify(
                     'foo',
                     [
@@ -126,7 +127,7 @@ final class ConfigReaderTest extends Framework\TestCase
                     ],
                 ),
             ],
-            $rootPath,
+            rootPath: $rootPath,
         );
 
         self::assertEquals($expected, $this->subject->readFromFile($file));
@@ -139,7 +140,7 @@ final class ConfigReaderTest extends Framework\TestCase
         $file = $rootPath.'/valid-config-without-root-path.json';
 
         $expected = new Src\Config\VersionBumperConfig(
-            [
+            filesToModify: [
                 new Src\Config\FileToModify(
                     'foo',
                     [
@@ -147,8 +148,18 @@ final class ConfigReaderTest extends Framework\TestCase
                     ],
                 ),
             ],
-            $rootPath,
+            rootPath: $rootPath,
         );
+
+        self::assertEquals($expected, $this->subject->readFromFile($file));
+    }
+
+    #[Framework\Attributes\Test]
+    #[Framework\Attributes\DataProvider('readFromFileAppliesConfiguredPresetsDataProvider')]
+    public function readFromFileAppliesConfiguredPresets(string $preset, Src\Config\VersionBumperConfig $expected): void
+    {
+        $rootPath = dirname(__DIR__).'/Fixtures/ConfigFiles';
+        $file = $rootPath.'/valid-config-with-'.$preset.'-preset.json';
 
         self::assertEquals($expected, $this->subject->readFromFile($file));
     }
@@ -166,5 +177,138 @@ final class ConfigReaderTest extends Framework\TestCase
         $expected = Path::join($rootPath, 'version-bumper.yaml');
 
         self::assertSame($expected, $this->subject->detectFile($rootPath));
+    }
+
+    /**
+     * @return Generator<string, array{string, Src\Config\VersionBumperConfig}>
+     */
+    public static function readFromFileAppliesConfiguredPresetsDataProvider(): Generator
+    {
+        $fileToModify = new Src\Config\FileToModify(
+            'baz',
+            [
+                'foo: {%version%}',
+            ],
+        );
+        $rootPath = dirname(__DIR__).'/Fixtures/RootPath';
+
+        yield 'Composer package' => [
+            'composer-package',
+            new Src\Config\VersionBumperConfig(
+                [
+                    new Src\Config\Preset\ComposerPackagePreset([
+                        'path' => 'foo',
+                    ]),
+                ],
+                [
+                    $fileToModify,
+                    new Src\Config\FileToModify(
+                        'foo/composer.json',
+                        [
+                            '"version": "{%version%}"',
+                        ],
+                        true,
+                    ),
+                ],
+                $rootPath,
+            ),
+        ];
+
+        yield 'Composer package (short syntax)' => [
+            'composer-package-short',
+            new Src\Config\VersionBumperConfig(
+                [
+                    new Src\Config\Preset\ComposerPackagePreset(),
+                ],
+                [
+                    $fileToModify,
+                    new Src\Config\FileToModify(
+                        'composer.json',
+                        [
+                            '"version": "{%version%}"',
+                        ],
+                        true,
+                    ),
+                ],
+                $rootPath,
+            ),
+        ];
+
+        yield 'NPM package' => [
+            'npm-package',
+            new Src\Config\VersionBumperConfig(
+                [
+                    new Src\Config\Preset\NpmPackagePreset([
+                        'packageName' => '@foo/baz',
+                        'path' => 'foo',
+                    ]),
+                ],
+                [
+                    $fileToModify,
+                    new Src\Config\FileToModify(
+                        'foo/package.json',
+                        [
+                            '"version": "{%version%}"',
+                        ],
+                        true,
+                    ),
+                    new Src\Config\FileToModify(
+                        'foo/package-lock.json',
+                        [
+                            '"name": "@foo/baz",\s+"version": "{%version%}"',
+                        ],
+                        true,
+                    ),
+                ],
+                $rootPath,
+            ),
+        ];
+
+        yield 'TYPO3 extension' => [
+            'typo3-extension',
+            new Src\Config\VersionBumperConfig(
+                [
+                    new Src\Config\Preset\Typo3ExtensionPreset(['documentation' => true]),
+                ],
+                [
+                    $fileToModify,
+                    new Src\Config\FileToModify(
+                        'ext_emconf.php',
+                        [
+                            "'version' => '{%version%}'",
+                        ],
+                        true,
+                    ),
+                    new Src\Config\FileToModify(
+                        'Documentation/guides.xml',
+                        [
+                            'release="{%version%}"',
+                        ],
+                        true,
+                    ),
+                ],
+                $rootPath,
+            ),
+        ];
+
+        yield 'TYPO3 extension (short syntax)' => [
+            'typo3-extension-short',
+            new Src\Config\VersionBumperConfig(
+                [
+                    new Src\Config\Preset\Typo3ExtensionPreset(),
+                ],
+                [
+                    $fileToModify,
+                    new Src\Config\FileToModify(
+                        'ext_emconf.php',
+                        [
+                            "'version' => '{%version%}'",
+                        ],
+                        true,
+                    ),
+                ],
+                $rootPath,
+            ),
+        ];
     }
 }

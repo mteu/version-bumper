@@ -252,6 +252,28 @@ final class BumpVersionCommandTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
+    public function executeDecoratesAppliedPresets(): void
+    {
+        $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-typo3-extension-preset.json';
+
+        $this->commandTester->execute(
+            [
+                'range' => '2.0.0',
+                '--config' => $configFile,
+                '--dry-run' => true,
+            ],
+            [
+                'verbosity' => Console\Output\OutputInterface::VERBOSITY_VERBOSE,
+            ],
+        );
+
+        $output = $this->commandTester->getDisplay();
+
+        self::assertStringContainsString('Applied presets', $output);
+        self::assertStringContainsString('* TYPO3 extension, managed by ext_emconf.php (typo3-extension)', $output);
+    }
+
+    #[Framework\Attributes\Test]
     public function executeDecoratesVersionBumpResult(): void
     {
         $configFile = dirname(__DIR__).'/Fixtures/ConfigFiles/valid-config-with-root-path.json';

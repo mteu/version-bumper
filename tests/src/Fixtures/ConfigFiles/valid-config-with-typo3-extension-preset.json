@@ -1,0 +1,19 @@
+{
+	"presets": [
+		{
+			"name": "typo3-extension",
+			"options": {
+				"documentation": true
+			}
+		}
+	],
+	"filesToModify": [
+		{
+			"path": "baz",
+			"patterns": [
+				"foo: {%version%}"
+			]
+		}
+	],
+	"rootPath": "../RootPath"
+}

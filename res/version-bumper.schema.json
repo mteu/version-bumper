@@ -3,6 +3,20 @@
 	"type": "object",
 	"title": "Version Bumper config file schema",
 	"properties": {
+		"presets": {
+			"type": "array",
+			"title": "List of presets to apply",
+			"items": {
+				"oneOf": [
+					{
+						"$ref": "#/definitions/preset"
+					},
+					{
+						"$ref": "#/definitions/presetShort"
+					}
+				]
+			}
+		},
 		"filesToModify": {
 			"type": "array",
 			"title": "List of files that contain versions which are to be bumped",
@@ -57,6 +71,105 @@
 			"required": [
 				"path",
 				"patterns"
+			]
+		},
+		"preset": {
+			"type": "object",
+			"title": "Default preset configuration",
+			"oneOf": [
+				{
+					"properties": {
+						"name": {
+							"type": "string",
+							"enum": [
+								"composer-package"
+							]
+						},
+						"options": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string",
+									"title": "Path to composer.json",
+									"default": null
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false,
+					"required": [
+						"name",
+						"options"
+					]
+				},
+				{
+					"properties": {
+						"name": {
+							"type": "string",
+							"enum": [
+								"npm-package"
+							]
+						},
+						"options": {
+							"type": "object",
+							"properties": {
+								"packageName": {
+									"type": "string",
+									"title": "NPM package name as defined in package.json"
+								},
+								"path": {
+									"type": "string",
+									"title": "Path to package.json",
+									"default": null
+								}
+							},
+							"additionalProperties": false,
+							"required": [
+								"packageName"
+							]
+						}
+					},
+					"additionalProperties": false,
+					"required": [
+						"name",
+						"options"
+					]
+				},
+				{
+					"properties": {
+						"name": {
+							"type": "string",
+							"enum": [
+								"typo3-extension"
+							]
+						},
+						"options": {
+							"type": "object",
+							"properties": {
+								"documentation": {
+									"type": "boolean",
+									"title": "Define whether extension has a ReST documentation",
+									"default": false
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false,
+					"required": [
+						"name"
+					]
+				}
+			]
+		},
+		"presetShort": {
+			"type": "string",
+			"title": "Short preset configuration",
+			"description": "Configuration for presets which do not have required preset options",
+			"enum": [
+				"composer-package",
+				"typo3-extension"
 			]
 		},
 		"releaseOptions": {

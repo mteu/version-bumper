@@ -1,0 +1,19 @@
+{
+	"presets": [
+		{
+			"name": "composer-package",
+			"options": {
+				"path": "foo"
+			}
+		}
+	],
+	"filesToModify": [
+		{
+			"path": "baz",
+			"patterns": [
+				"foo: {%version%}"
+			]
+		}
+	],
+	"rootPath": "../RootPath"
+}

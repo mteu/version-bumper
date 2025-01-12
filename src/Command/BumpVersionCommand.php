@@ -35,6 +35,7 @@ use GitElephant\Command\Caller;
 use Symfony\Component\Console;
 use Symfony\Component\Filesystem;
 
+use function array_map;
 use function count;
 use function dirname;
 use function getcwd;
@@ -179,7 +180,6 @@ final class BumpVersionCommand extends Command\BaseCommand
         try {
             $config = $this->configReader->readFromFile($configFile);
             $finalRootPath = $config->rootPath() ?? $rootPath;
-            $versionRange = null;
 
             // Auto-detect version range from indicators
             if (null !== $rangeOrVersion) {
@@ -204,6 +204,8 @@ final class BumpVersionCommand extends Command\BaseCommand
 
                 return null;
             }
+
+            $this->decorateAppliedPresets($config->presets());
 
             $results = $this->bumper->bump($config->filesToModify(), $finalRootPath, $versionRange, $dryRun);
 
@@ -239,6 +241,29 @@ final class BumpVersionCommand extends Command\BaseCommand
         }
 
         return false;
+    }
+
+    /**
+     * @param list<Config\Preset\Preset> $presets
+     */
+    private function decorateAppliedPresets(array $presets): void
+    {
+        if ([] === $presets || !$this->io->isVerbose()) {
+            return;
+        }
+
+        $this->io->title('Applied presets');
+
+        $this->io->listing(
+            array_map(
+                static fn (Config\Preset\Preset $preset) => sprintf(
+                    '%s <fg=gray>(%s)</>',
+                    $preset::getDescription(),
+                    $preset::getIdentifier(),
+                ),
+                $presets,
+            ),
+        );
     }
 
     /**
