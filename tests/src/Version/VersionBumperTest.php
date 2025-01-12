@@ -78,6 +78,26 @@ final class VersionBumperTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
+    public function bumpReturnsEmptyResultIfFileToModifyDoesNotExistAndReportMissingIsDisabled(): void
+    {
+        $fileToModify = new Src\Config\FileToModify(
+            'foo',
+            [
+                'foo: {%version%}',
+                'baz: {%version%}',
+            ],
+            reportMissing: false,
+        );
+
+        self::assertEquals(
+            [
+                new Src\Result\VersionBumpResult($fileToModify, []),
+            ],
+            $this->subject->bump([$fileToModify], '/baz', Src\Enum\VersionRange::Next),
+        );
+    }
+
+    #[Framework\Attributes\Test]
     public function bumpDoesNothingIfFileContentsWereNotModified(): void
     {
         $fooFile = $this->filesToModify[0];
