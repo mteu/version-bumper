@@ -36,15 +36,24 @@ composer require --dev eliashaeussler/version-bumper
 $ composer bump-version [<range>] [-c|--config CONFIG] [-r|--release] [--dry-run] [--strict]
 ```
 
+> [!IMPORTANT]
+> Unstable versions (< `1.0.0`) are handled differently.
+> Bumping major version increases the second version
+> number (`0.1.2` → `0.2.0`) and bumping minor version
+> increases the third version number (`0.1.2` → `0.1.3`).
+
 Pass the following options to the console command:
 
 * `<range>`: Version range to be bumped, can be one of:
   - `major`/`maj`: Bump version to next major version
-    (`1.2.3` -> `2.0.0`)
+    + stable: `1.2.3` → `2.0.0`
+    + unstable: `0.1.2` → `0.2.0`
   - `minor`/`min`: Bump version to next minor version
-    (`1.2.3` -> `1.3.0`)
-  - `next`/`n`/`patch`/`p`: Bump version to next patch
-    version (`1.2.3` -> `1.2.4`)
+    + stable: `1.2.3` → `1.3.0`
+    + unstable: `0.1.2` → `0.1.3`
+  - `next`/`n`/`patch`/`p`: Bump version to next patch version
+    + stable: `1.2.3` → `1.2.4`
+    + unstable: `0.1.2` → `0.1.3`
   - Explicit version, e.g. `1.3.0`
 * `-c`/`--config`: Path to [config file](#-configuration),
   defaults to auto-detection in current working directory,

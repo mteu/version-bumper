@@ -60,10 +60,19 @@ final class VersionTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
-    #[Framework\Attributes\DataProvider('increaseReturnsIncreasedVersionDataProvider')]
-    public function increaseReturnsIncreasedVersion(Src\Enum\VersionRange $range, Src\Version\Version $expected): void
+    #[Framework\Attributes\DataProvider('increaseReturnsIncreasedStableVersionDataProvider')]
+    public function increaseReturnsIncreasedStableVersion(Src\Enum\VersionRange $range, Src\Version\Version $expected): void
     {
         self::assertEquals($expected, $this->subject->increase($range));
+    }
+
+    #[Framework\Attributes\Test]
+    #[Framework\Attributes\DataProvider('increaseReturnsIncreasedUnstableVersionDataProvider')]
+    public function increaseReturnsIncreasedUnstableVersion(Src\Enum\VersionRange $range, Src\Version\Version $expected): void
+    {
+        $subject = new Src\Version\Version(0, 1, 2);
+
+        self::assertEquals($expected, $subject->increase($range));
     }
 
     #[Framework\Attributes\Test]
@@ -81,11 +90,22 @@ final class VersionTest extends Framework\TestCase
     /**
      * @return Generator<string, array{Src\Enum\VersionRange, Src\Version\Version}>
      */
-    public static function increaseReturnsIncreasedVersionDataProvider(): Generator
+    public static function increaseReturnsIncreasedStableVersionDataProvider(): Generator
     {
         yield 'major' => [Src\Enum\VersionRange::Major, new Src\Version\Version(2, 0, 0)];
         yield 'minor' => [Src\Enum\VersionRange::Minor, new Src\Version\Version(1, 3, 0)];
         yield 'next' => [Src\Enum\VersionRange::Next, new Src\Version\Version(1, 2, 4)];
         yield 'patch' => [Src\Enum\VersionRange::Patch, new Src\Version\Version(1, 2, 4)];
+    }
+
+    /**
+     * @return Generator<string, array{Src\Enum\VersionRange, Src\Version\Version}>
+     */
+    public static function increaseReturnsIncreasedUnstableVersionDataProvider(): Generator
+    {
+        yield 'major' => [Src\Enum\VersionRange::Major, new Src\Version\Version(0, 2, 0)];
+        yield 'minor' => [Src\Enum\VersionRange::Minor, new Src\Version\Version(0, 1, 3)];
+        yield 'next' => [Src\Enum\VersionRange::Next, new Src\Version\Version(0, 1, 3)];
+        yield 'patch' => [Src\Enum\VersionRange::Patch, new Src\Version\Version(0, 1, 3)];
     }
 }
