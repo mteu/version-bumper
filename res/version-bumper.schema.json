@@ -41,9 +41,6 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": [
-		"filesToModify"
-	],
 	"definitions": {
 		"fileToModify": {
 			"type": "object",
