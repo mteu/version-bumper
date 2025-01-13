@@ -32,13 +32,14 @@ Preset for NPM packages managed by a `package.json` file.
 Preset for legacy or public TYPO3 extensions managed by an
 `ext_emconf.php` file.
 
-| Option          | Type                                   | Required | Description                                                          |
-|-----------------|----------------------------------------|----------|----------------------------------------------------------------------|
-| `documentation` | Boolean or `auto` keyword<sup>1)</sup> | –        | Define whether or not a ReST documentation is used in the extension. |
+| Option          | Type                                            | Required | Description                                                          |
+|-----------------|-------------------------------------------------|----------|----------------------------------------------------------------------|
+| `documentation` | Boolean or `auto`/`legacy` keyword<sup>1)</sup> | –        | Define whether or not a ReST documentation is used in the extension. |
 
 <sup>1)</sup> By default or if keyword `auto` is used, ReST documentation
 version may be replaced, if existent, but version bumping will not fail if
-a ReST documentation does not exist.
+a ReST documentation does not exist. If `legacy` keyword is used, legacy
+Sphinx-based rendering documentation files will be used for version bumps.
 
 ### TYPO3 commit guidelines (`typo3-commit-guidelines`)
 

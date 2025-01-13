@@ -175,11 +175,13 @@
 										{
 											"type": "string",
 											"enum": [
-												"auto"
+												"auto",
+												"legacy"
 											]
 										}
 									],
 									"title": "Define whether extension has a ReST documentation",
+									"description": "Use \"auto\" to automatically detect documentation files (PHP-based or Sphinx-based rendering) or \"legacy\" to use Sphinx-based rendering files.",
 									"default": "auto"
 								}
 							},
