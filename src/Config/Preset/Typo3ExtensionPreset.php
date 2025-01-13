@@ -26,17 +26,20 @@ namespace EliasHaeussler\VersionBumper\Config\Preset;
 use EliasHaeussler\VersionBumper\Config;
 use Symfony\Component\OptionsResolver;
 
+use function in_array;
+
 /**
  * Typo3ExtensionPreset.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  *
- * @extends BasePreset<array{documentation: 'auto'|bool}>
+ * @extends BasePreset<array{documentation: self::*_KEYWORD|bool}>
  */
 final class Typo3ExtensionPreset extends BasePreset
 {
     private const AUTO_KEYWORD = 'auto';
+    private const LEGACY_KEYWORD = 'legacy';
 
     public function __construct(array $options = [])
     {
@@ -45,6 +48,7 @@ final class Typo3ExtensionPreset extends BasePreset
 
     public function getConfig(): Config\VersionBumperConfig
     {
+        $reportMissingFile = self::AUTO_KEYWORD !== $this->options['documentation'];
         $filesToModify = [
             new Config\FileToModify(
                 'ext_emconf.php',
@@ -55,14 +59,27 @@ final class Typo3ExtensionPreset extends BasePreset
             ),
         ];
 
-        if (false !== $this->options['documentation']) {
+        // New PHP-based documentation rendering
+        if (in_array($this->options['documentation'], [self::AUTO_KEYWORD, true], true)) {
             $filesToModify[] = new Config\FileToModify(
                 'Documentation/guides.xml',
                 [
                     new Config\FilePattern('release="{%version%}"'),
                 ],
                 true,
-                self::AUTO_KEYWORD !== $this->options['documentation'],
+                $reportMissingFile,
+            );
+        }
+
+        // Legacy Sphinx-based documentation rendering
+        if (in_array($this->options['documentation'], [self::AUTO_KEYWORD, self::LEGACY_KEYWORD], true)) {
+            $filesToModify[] = new Config\FileToModify(
+                'Documentation/Settings.cfg',
+                [
+                    new Config\FilePattern('release = {%version%}'),
+                ],
+                true,
+                $reportMissingFile,
             );
         }
 
@@ -83,7 +100,7 @@ final class Typo3ExtensionPreset extends BasePreset
     {
         $optionsResolver = new OptionsResolver\OptionsResolver();
         $optionsResolver->define('documentation')
-            ->allowedValues(self::AUTO_KEYWORD, true, false)
+            ->allowedValues(self::AUTO_KEYWORD, self::LEGACY_KEYWORD, true, false)
             ->default(self::AUTO_KEYWORD)
         ;
 

@@ -187,7 +187,7 @@ final class ConfigReaderTest extends Framework\TestCase
         $fileToModify = new Src\Config\FileToModify(
             'baz',
             [
-                'foo: {%version%}',
+                new Src\Config\FilePattern('foo: {%version%}'),
             ],
         );
         $rootPath = dirname(__DIR__).'/Fixtures/RootPath';
@@ -205,7 +205,7 @@ final class ConfigReaderTest extends Framework\TestCase
                     new Src\Config\FileToModify(
                         'foo/composer.json',
                         [
-                            '"version": "{%version%}"',
+                            new Src\Config\FilePattern('"version": "{%version%}"'),
                         ],
                         true,
                     ),
@@ -225,7 +225,7 @@ final class ConfigReaderTest extends Framework\TestCase
                     new Src\Config\FileToModify(
                         'composer.json',
                         [
-                            '"version": "{%version%}"',
+                            new Src\Config\FilePattern('"version": "{%version%}"'),
                         ],
                         true,
                     ),
@@ -248,14 +248,14 @@ final class ConfigReaderTest extends Framework\TestCase
                     new Src\Config\FileToModify(
                         'foo/package.json',
                         [
-                            '"version": "{%version%}"',
+                            new Src\Config\FilePattern('"version": "{%version%}"'),
                         ],
                         true,
                     ),
                     new Src\Config\FileToModify(
                         'foo/package-lock.json',
                         [
-                            '"name": "@foo/baz",\s+"version": "{%version%}"',
+                            new Src\Config\FilePattern('"name": "@foo/baz",\s+"version": "{%version%}"'),
                         ],
                         true,
                     ),
@@ -275,14 +275,14 @@ final class ConfigReaderTest extends Framework\TestCase
                     new Src\Config\FileToModify(
                         'ext_emconf.php',
                         [
-                            "'version' => '{%version%}'",
+                            new Src\Config\FilePattern("'version' => '{%version%}'"),
                         ],
                         true,
                     ),
                     new Src\Config\FileToModify(
                         'Documentation/guides.xml',
                         [
-                            'release="{%version%}"',
+                            new Src\Config\FilePattern('release="{%version%}"'),
                         ],
                         true,
                     ),
@@ -302,14 +302,22 @@ final class ConfigReaderTest extends Framework\TestCase
                     new Src\Config\FileToModify(
                         'ext_emconf.php',
                         [
-                            "'version' => '{%version%}'",
+                            new Src\Config\FilePattern("'version' => '{%version%}'"),
                         ],
                         true,
                     ),
                     new Src\Config\FileToModify(
                         'Documentation/guides.xml',
                         [
-                            'release="{%version%}"',
+                            new Src\Config\FilePattern('release="{%version%}"'),
+                        ],
+                        true,
+                        false,
+                    ),
+                    new Src\Config\FileToModify(
+                        'Documentation/Settings.cfg',
+                        [
+                            new Src\Config\FilePattern('release = {%version%}'),
                         ],
                         true,
                         false,
