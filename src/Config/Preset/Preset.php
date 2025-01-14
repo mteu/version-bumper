@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Config\Preset;
 
 use EliasHaeussler\VersionBumper\Config;
-use EliasHaeussler\VersionBumper\Exception;
 
 /**
  * Preset.
@@ -34,13 +33,6 @@ use EliasHaeussler\VersionBumper\Exception;
  */
 interface Preset
 {
-    /**
-     * @param array<string, mixed> $options
-     *
-     * @throws Exception\PresetOptionsAreInvalid
-     */
-    public function __construct(array $options);
-
     public function getConfig(): Config\VersionBumperConfig;
 
     public static function getIdentifier(): string;

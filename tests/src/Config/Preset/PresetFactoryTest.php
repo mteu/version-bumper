@@ -55,13 +55,21 @@ final class PresetFactoryTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function getReturnsGivenPreset(): void
     {
+        $expected = new Src\Config\Preset\Typo3CommitGuidelinesPreset();
+
+        self::assertEquals($expected, $this->subject->get('typo3-commit-guidelines'));
+    }
+
+    #[Framework\Attributes\Test]
+    public function getReturnsGivenConfigurablePreset(): void
+    {
         $expected = new Src\Config\Preset\Typo3ExtensionPreset();
 
         self::assertEquals($expected, $this->subject->get('typo3-extension'));
     }
 
     #[Framework\Attributes\Test]
-    public function getAppliesGivenConfigToPreset(): void
+    public function getAppliesGivenConfigToConfigurablePreset(): void
     {
         $expected = new Src\Config\Preset\NpmPackagePreset(['packageName' => '@foo/baz']);
 

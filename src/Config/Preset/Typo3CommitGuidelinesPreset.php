@@ -36,9 +36,6 @@ use EliasHaeussler\VersionBumper\Enum;
  */
 final class Typo3CommitGuidelinesPreset implements Preset
 {
-    /* @phpstan-ignore constructor.unusedParameter */
-    public function __construct(array $options = []) {}
-
     public function getConfig(): Config\VersionBumperConfig
     {
         $versionRangeIndicators = [
