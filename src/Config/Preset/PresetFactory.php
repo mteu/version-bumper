@@ -37,6 +37,7 @@ final class PresetFactory
 {
     private const PRESETS = [
         ComposerPackagePreset::class,
+        ConventionalCommitsPreset::class,
         NpmPackagePreset::class,
         Typo3ExtensionPreset::class,
         Typo3CommitGuidelinesPreset::class,

@@ -18,6 +18,12 @@ Preset for Composer packages managed by a `composer.json` file.
 |--------|--------|----------|----------------------------------------------------------------------------|
 | `path` | String | –        | Directory where `composer.json` is located, defaults to current directory. |
 
+### Conventional Commits (`conventional-commits`)
+
+Preset for [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+
+_This preset is not configurable._
+
 ### NPM package (`npm-package`)
 
 Preset for NPM packages managed by a `package.json` file.
@@ -45,6 +51,8 @@ Sphinx-based rendering documentation files will be used for version bumps.
 
 Preset for TYPO3 projects which adhere to the
 [Commit Message rules for TYPO3 CMS](https://docs.typo3.org/m/typo3/guide-contributionworkflow/main/en-us/Appendix/CommitMessage.html).
+
+_This preset is not configurable._
 
 ## Example
 
