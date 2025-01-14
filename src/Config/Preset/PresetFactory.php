@@ -25,6 +25,8 @@ namespace EliasHaeussler\VersionBumper\Config\Preset;
 
 use EliasHaeussler\VersionBumper\Exception;
 
+use function is_a;
+
 /**
  * PresetFactory.
  *
@@ -49,9 +51,15 @@ final class PresetFactory
     {
         /** @var class-string<Preset> $presetClass */
         foreach (self::PRESETS as $presetClass) {
-            if ($presetClass::getIdentifier() === $name) {
+            if ($presetClass::getIdentifier() !== $name) {
+                continue;
+            }
+
+            if (is_a($presetClass, ConfigurablePreset::class, true)) {
                 return new $presetClass($options);
             }
+
+            return new $presetClass();
         }
 
         throw new Exception\PresetDoesNotExist($name);

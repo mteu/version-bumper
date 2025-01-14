@@ -24,41 +24,19 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Config\Preset;
 
 use EliasHaeussler\VersionBumper\Exception;
-use Symfony\Component\OptionsResolver;
 
 /**
- * BasePreset.
+ * ConfigurablePreset.
  *
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
- *
- * @template TOptions of array<string, mixed>
  */
-abstract class BasePreset implements ConfigurablePreset
+interface ConfigurablePreset extends Preset
 {
-    /**
-     * @var TOptions
-     */
-    protected array $options;
-
     /**
      * @param array<string, mixed> $options
      *
-     * @return TOptions
-     *
      * @throws Exception\PresetOptionsAreInvalid
      */
-    protected function resolveOptions(array $options): array
-    {
-        $optionsResolver = $this->createOptionsResolver();
-
-        try {
-            /* @phpstan-ignore return.type */
-            return $optionsResolver->resolve($options);
-        } catch (OptionsResolver\Exception\MissingOptionsException $exception) {
-            throw new Exception\PresetOptionsAreInvalid($this, $exception);
-        }
-    }
-
-    abstract protected function createOptionsResolver(): OptionsResolver\OptionsResolver;
+    public function __construct(array $options);
 }
