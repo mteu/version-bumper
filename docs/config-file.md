@@ -13,6 +13,7 @@ bumper.
 The following file formats are supported currently:
 
 * `json`
+* `php`
 * `yaml`, `yml`
 
 ## Configuration in `composer.json`
@@ -39,6 +40,7 @@ If no config file is explicitly configured, the config reader
 tries to auto-detect its location. The following order is taken
 into account during auto-detection:
 
-1. `version-bumper.json`
-2. `version-bumper.yaml`
-3. `version-bumper.yml`
+1. `version-bumper.php`
+2. `version-bumper.json`
+3. `version-bumper.yaml`
+4. `version-bumper.yml`

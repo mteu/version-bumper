@@ -30,6 +30,7 @@ use Symfony\Component\Filesystem;
 use Symfony\Component\Yaml;
 
 use function dirname;
+use function is_callable;
 
 /**
  * ConfigReader.
@@ -61,12 +62,17 @@ final class ConfigReader
         }
 
         $extension = Filesystem\Path::getExtension($file, true);
-        $source = match ($extension) {
-            'json' => Valinor\Mapper\Source\Source::file(new SplFileObject($file)),
-            'yaml', 'yml' => Valinor\Mapper\Source\Source::array($this->parseYamlFile($file)),
-            default => throw new Exception\ConfigFileIsNotSupported($file),
-        };
-        $config = $this->mapper->map(VersionBumperConfig::class, $source);
+
+        if ('php' === $extension) {
+            $config = $this->parsePhpFile($file);
+        } else {
+            $source = match ($extension) {
+                'json' => Valinor\Mapper\Source\Source::file(new SplFileObject($file)),
+                'yaml', 'yml' => Valinor\Mapper\Source\Source::array($this->parseYamlFile($file)),
+                default => throw new Exception\ConfigFileIsNotSupported($file),
+            };
+            $config = $this->mapper->map(VersionBumperConfig::class, $source);
+        }
 
         if (null === $config->rootPath()) {
             $config->setRootPath(dirname($file));
@@ -86,6 +92,7 @@ final class ConfigReader
     public function detectFile(string $rootPath): ?string
     {
         $filenames = [
+            'version-bumper.php',
             'version-bumper.json',
             'version-bumper.yaml',
             'version-bumper.yml',
@@ -100,6 +107,30 @@ final class ConfigReader
         }
 
         return null;
+    }
+
+    /**
+     * @throws Exception\ConfigFileIsInvalid
+     */
+    private function parsePhpFile(string $file): VersionBumperConfig
+    {
+        $returnValue = require $file;
+
+        if ($returnValue instanceof VersionBumperConfig) {
+            return $returnValue;
+        }
+
+        if (!is_callable($returnValue)) {
+            throw new Exception\ConfigFileIsInvalid($file);
+        }
+
+        $config = $returnValue();
+
+        if (!($config instanceof VersionBumperConfig)) {
+            throw new Exception\ConfigFileIsInvalid($file);
+        }
+
+        return $config;
     }
 
     /**
