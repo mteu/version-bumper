@@ -37,9 +37,9 @@ use function is_array;
 final class VersionBumperConfig
 {
     /**
+     * @param list<Preset\Preset>         $presets
      * @param list<FileToModify>          $filesToModify
      * @param list<VersionRangeIndicator> $versionRangeIndicators
-     * @param list<Preset\Preset>         $presets
      */
     public function __construct(
         private readonly array $presets = [],
