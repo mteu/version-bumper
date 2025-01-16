@@ -16,6 +16,37 @@ The following file formats are supported currently:
 * `php`
 * `yaml`, `yml`
 
+### Configuration in PHP file
+
+When using PHP files to provide configuration, make sure to:
+
+1. either return instance of [`VersionBumperConfig`](../src/Config/VersionBumperConfig.php)
+2. or return a closure which returns an instance of
+   [`VersionBumperConfig`](../src/Config/VersionBumperConfig.php).
+
+Example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use EliasHaeussler\VersionBumper;
+
+return new VersionBumper\Config\VersionBumperConfig(
+    [
+        new VersionBumper\Config\Preset\ComposerPackagePreset(),
+    ],
+    [
+        new VersionBumper\Config\FileToModify(
+            'src/Version.php',
+            [
+                new VersionBumper\Config\FilePattern('const VERSION = \'{%version%}\';'),
+            ],
+        ),
+    ],
+```
+
 ## Configuration in `composer.json`
 
 The config file path can be passed as `-c`/`--config` command
