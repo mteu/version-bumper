@@ -23,11 +23,11 @@ declare(strict_types=1);
 
 namespace EliasHaeussler\VersionBumper\Tests\Config;
 
-use CuyZ\Valinor\Mapper\MappingError;
+use CuyZ\Valinor;
 use EliasHaeussler\VersionBumper as Src;
 use Generator;
 use PHPUnit\Framework;
-use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Filesystem;
 
 use function dirname;
 
@@ -60,7 +60,7 @@ final class ConfigReaderTest extends Framework\TestCase
     #[Framework\Attributes\Test]
     public function readFromFileThrowsExceptionOnUnsupportedConfigFile(): void
     {
-        $file = __FILE__;
+        $file = dirname(__DIR__, 3).'/phpunit.xml';
 
         $this->expectExceptionObject(
             new Src\Exception\ConfigFileIsNotSupported($file),
@@ -70,11 +70,63 @@ final class ConfigReaderTest extends Framework\TestCase
     }
 
     #[Framework\Attributes\Test]
-    public function readFromFileThrowsExceptionOnInvalidConfigFile(): void
+    public function readFromFileThrowsExceptionOnInvalidPhpFile(): void
+    {
+        $file = dirname(__DIR__).'/Fixtures/ConfigFiles/invalid-config.php';
+
+        $this->expectException(Src\Exception\ConfigFileIsInvalid::class);
+
+        $this->subject->readFromFile($file);
+    }
+
+    #[Framework\Attributes\Test]
+    public function readFromFileReturnsConfigFromPhpFile(): void
+    {
+        $rootPath = dirname(__DIR__).'/Fixtures';
+        $file = $rootPath.'/ConfigFiles/valid-config.php';
+
+        $expected = new Src\Config\VersionBumperConfig(
+            filesToModify: [
+                new Src\Config\FileToModify(
+                    'foo',
+                    [
+                        'baz: {%version%}',
+                    ],
+                ),
+            ],
+            rootPath: $rootPath,
+        );
+
+        self::assertEquals($expected, $this->subject->readFromFile($file));
+    }
+
+    #[Framework\Attributes\Test]
+    public function readFromFileReturnsConfigFromClosureInPhpFile(): void
+    {
+        $rootPath = dirname(__DIR__).'/Fixtures';
+        $file = $rootPath.'/ConfigFiles/valid-config-with-closure.php';
+
+        $expected = new Src\Config\VersionBumperConfig(
+            filesToModify: [
+                new Src\Config\FileToModify(
+                    'foo',
+                    [
+                        'baz: {%version%}',
+                    ],
+                ),
+            ],
+            rootPath: $rootPath,
+        );
+
+        self::assertEquals($expected, $this->subject->readFromFile($file));
+    }
+
+    #[Framework\Attributes\Test]
+    public function readFromFileThrowsExceptionOnInvalidJsonFile(): void
     {
         $file = dirname(__DIR__).'/Fixtures/ConfigFiles/invalid-config.json';
 
-        $this->expectException(MappingError::class);
+        $this->expectException(Valinor\Mapper\MappingError::class);
 
         $this->subject->readFromFile($file);
     }
@@ -174,7 +226,7 @@ final class ConfigReaderTest extends Framework\TestCase
     public function detectFileReturnsAutoDetectedFileWithinGivenRootPath(): void
     {
         $rootPath = dirname(__DIR__).'/Fixtures/ConfigFiles';
-        $expected = Path::join($rootPath, 'version-bumper.yaml');
+        $expected = Filesystem\Path::join($rootPath, 'version-bumper.php');
 
         self::assertSame($expected, $this->subject->detectFile($rootPath));
     }
