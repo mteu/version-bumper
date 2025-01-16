@@ -20,7 +20,7 @@ The following file formats are supported currently:
 
 When using PHP files to provide configuration, make sure to:
 
-1. either return instance of [`VersionBumperConfig`](../src/Config/VersionBumperConfig.php)
+1. either return an instance of [`VersionBumperConfig`](../src/Config/VersionBumperConfig.php)
 2. or return a closure which returns an instance of
    [`VersionBumperConfig`](../src/Config/VersionBumperConfig.php).
 
