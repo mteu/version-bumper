@@ -11,6 +11,7 @@
 		{
 			"path": "baz",
 			"patterns": [
+				"baz: {%version%}",
 				"foo: {%version%}"
 			]
 		},
