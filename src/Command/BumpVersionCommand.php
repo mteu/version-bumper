@@ -35,6 +35,7 @@ use GitElephant\Command\Caller;
 use Symfony\Component\Console;
 use Symfony\Component\Filesystem;
 
+use function array_filter;
 use function array_map;
 use function count;
 use function dirname;
@@ -279,6 +280,11 @@ final class BumpVersionCommand extends Command\BaseCommand
             }
 
             $path = $result->file()->path();
+            $groupedOperations = $result->groupedOperations();
+            $hasOnlySkippedOperations = [] === array_filter(
+                $groupedOperations,
+                static fn (array $operations) => Enum\OperationState::Skipped !== reset($operations)->state(),
+            );
 
             if (Filesystem\Path::isAbsolute($path)) {
                 $path = Filesystem\Path::makeRelative($path, $rootPath);
@@ -291,10 +297,16 @@ final class BumpVersionCommand extends Command\BaseCommand
 
             $this->io->section($path);
 
-            foreach ($result->groupedOperations() as $operations) {
+            foreach ($groupedOperations as $operations) {
                 $operation = reset($operations);
                 $numberOfOperations = count($operations);
-                $message = match ($operation->state()) {
+                $state = $operation->state();
+
+                if (Enum\OperationState::Skipped === $state && !$hasOnlySkippedOperations) {
+                    continue;
+                }
+
+                $message = match ($state) {
                     Enum\OperationState::Modified => sprintf(
                         '✅ Bumped version from "%s" to "%s"',
                         $operation->source()?->full(),
