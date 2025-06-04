@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Tests\Fixtures\Classes;
 
 use EliasHaeussler\VersionBumper\Config;
-use EliasHaeussler\VersionBumper\Config\Preset\BasePreset;
 use Symfony\Component\OptionsResolver;
 
 /**
@@ -35,16 +34,16 @@ use Symfony\Component\OptionsResolver;
  *
  * @internal
  *
- * @extends BasePreset<array<string, mixed>>
+ * @extends Config\Preset\BasePreset<array<string, mixed>>
  */
-final class DummyPreset extends BasePreset
+final class DummyPreset extends Config\Preset\BasePreset
 {
     public function __construct(array $options = [])
     {
         $this->options = $options;
     }
 
-    public function getConfig(): Config\VersionBumperConfig
+    public function getConfig(?Config\VersionBumperConfig $rootConfig = null): Config\VersionBumperConfig
     {
         return new Config\VersionBumperConfig();
     }

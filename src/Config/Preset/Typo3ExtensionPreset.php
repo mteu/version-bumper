@@ -46,7 +46,7 @@ final class Typo3ExtensionPreset extends BasePreset
         $this->options = $this->resolveOptions($options);
     }
 
-    public function getConfig(): Config\VersionBumperConfig
+    public function getConfig(?Config\VersionBumperConfig $rootConfig = null): Config\VersionBumperConfig
     {
         $reportMissingFile = self::AUTO_KEYWORD !== $this->options['documentation'];
         $filesToModify = [
