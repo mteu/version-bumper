@@ -24,9 +24,15 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Config\Preset;
 
 use EliasHaeussler\VersionBumper\Config;
+use EliasHaeussler\VersionBumper\Exception;
+use JsonException;
+use stdClass;
+use Symfony\Component\Filesystem;
 use Symfony\Component\OptionsResolver;
 
+use function is_string;
 use function ltrim;
+use function property_exists;
 use function sprintf;
 
 /**
@@ -35,32 +41,52 @@ use function sprintf;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  *
- * @extends BasePreset<array{packageName: string, path: string|null}>
+ * @extends BasePreset<array{packageName: string|null, path: string}>
  */
 final class NpmPackagePreset extends BasePreset
 {
+    private readonly Filesystem\Filesystem $filesystem;
+
     public function __construct(array $options)
     {
+        $this->filesystem = new Filesystem\Filesystem();
         $this->options = $this->resolveOptions($options);
     }
 
+    /**
+     * @throws Exception\FileDoesNotExist
+     * @throws Exception\FileIsNotReadable
+     * @throws Exception\FilePatternIsInvalid
+     * @throws Exception\ManifestFileIsMalformed
+     * @throws Exception\PackageNameIsMissing
+     */
     public function getConfig(?Config\VersionBumperConfig $rootConfig = null): Config\VersionBumperConfig
     {
+        $packageJsonFile = new Config\FileToModify(
+            $this->resolvePath('package.json'),
+            [
+                new Config\FilePattern('"version": "{%version%}"'),
+            ],
+            true,
+        );
+
+        if (null !== $this->options['packageName']) {
+            $packageName = $this->options['packageName'];
+        } elseif (null !== $rootConfig && null !== $rootConfig->rootPath()) {
+            $packageName = $this->resolvePackageName($packageJsonFile->fullPath($rootConfig->rootPath()));
+        } else {
+            throw new Exception\PackageNameIsMissing($packageJsonFile->path());
+        }
+
         $filesToModify = [
-            new Config\FileToModify(
-                $this->resolvePath('package.json'),
-                [
-                    new Config\FilePattern('"version": "{%version%}"'),
-                ],
-                true,
-            ),
+            $packageJsonFile,
             new Config\FileToModify(
                 $this->resolvePath('package-lock.json'),
                 [
                     new Config\FilePattern(
                         sprintf(
                             '"name": "%s",\s+"version": "{%%version%%}"',
-                            $this->options['packageName'],
+                            $packageName,
                         ),
                     ),
                 ],
@@ -86,12 +112,45 @@ final class NpmPackagePreset extends BasePreset
         return ltrim($this->options['path'].'/'.$filename, '/');
     }
 
+    /**
+     * @throws Exception\FileDoesNotExist
+     * @throws Exception\FileIsNotReadable
+     * @throws Exception\ManifestFileIsMalformed
+     */
+    private function resolvePackageName(string $path): string
+    {
+        if (!$this->filesystem->exists($path)) {
+            throw new Exception\FileDoesNotExist($path);
+        }
+
+        $contents = file_get_contents($path);
+
+        if (false === $contents) {
+            throw new Exception\FileIsNotReadable($path);
+        }
+
+        try {
+            $packageJson = json_decode($contents, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new Exception\ManifestFileIsMalformed($path, $exception);
+        }
+
+        if (!($packageJson instanceof stdClass)
+            || !property_exists($packageJson, 'name')
+            || !is_string($packageJson->name)
+        ) {
+            throw new Exception\ManifestFileIsMalformed($path);
+        }
+
+        return $packageJson->name;
+    }
+
     protected function createOptionsResolver(): OptionsResolver\OptionsResolver
     {
         $optionsResolver = new OptionsResolver\OptionsResolver();
         $optionsResolver->define('packageName')
-            ->allowedTypes('string')
-            ->required()
+            ->allowedTypes('string', 'null')
+            ->default(null)
         ;
         $optionsResolver->define('path')
             ->allowedTypes('string')

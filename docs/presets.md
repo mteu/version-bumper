@@ -28,10 +28,13 @@ _This preset is not configurable._
 
 Preset for NPM packages managed by a `package.json` file.
 
-| Option        | Type   | Required | Description                                                               |
-|---------------|--------|----------|---------------------------------------------------------------------------|
-| `packageName` | String | ✅        | Name of the package as configured in `package.json`.                      |
-| `path`        | String | –        | Directory where `package.json` is located, defaults to current directory. |
+| Option        | Type   | Required       | Description                                                               |
+|---------------|--------|----------------|---------------------------------------------------------------------------|
+| `packageName` | String | –<sup>1)</sup> | Name of the package as configured in `package.json`.                      |
+| `path`        | String | –              | Directory where `package.json` is located, defaults to current directory. |
+
+<sup>1)</sup> When omitted, the package name is automatically resolved
+from the given `package.json` file.
 
 ### TYPO3 extension (`typo3-extension`)
 
@@ -40,9 +43,9 @@ Preset for legacy or public TYPO3 extensions managed by an
 
 | Option          | Type                                            | Required | Description                                                          |
 |-----------------|-------------------------------------------------|----------|----------------------------------------------------------------------|
-| `documentation` | Boolean or `auto`/`legacy` keyword<sup>1)</sup> | –        | Define whether or not a ReST documentation is used in the extension. |
+| `documentation` | Boolean or `auto`/`legacy` keyword<sup>2)</sup> | –        | Define whether or not a ReST documentation is used in the extension. |
 
-<sup>1)</sup> By default or if keyword `auto` is used, ReST documentation
+<sup>2)</sup> By default or if keyword `auto` is used, ReST documentation
 version may be replaced, if existent, but version bumping will not fail if
 a ReST documentation does not exist. If `legacy` keyword is used, legacy
 Sphinx-based rendering documentation files will be used for version bumps.

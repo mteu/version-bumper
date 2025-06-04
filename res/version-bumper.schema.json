@@ -102,8 +102,7 @@
 					},
 					"additionalProperties": false,
 					"required": [
-						"name",
-						"options"
+						"name"
 					]
 				},
 				{
@@ -127,16 +126,12 @@
 									"default": null
 								}
 							},
-							"additionalProperties": false,
-							"required": [
-								"packageName"
-							]
+							"additionalProperties": false
 						}
 					},
 					"additionalProperties": false,
 					"required": [
-						"name",
-						"options"
+						"name"
 					]
 				},
 				{
@@ -200,6 +195,7 @@
 			"enum": [
 				"composer-package",
 				"conventional-commits",
+				"npm-package",
 				"typo3-commit-guidelines",
 				"typo3-extension"
 			]
