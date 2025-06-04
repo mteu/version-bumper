@@ -24,7 +24,10 @@ declare(strict_types=1);
 namespace EliasHaeussler\VersionBumper\Tests\Config\Preset;
 
 use EliasHaeussler\VersionBumper as Src;
+use Generator;
 use PHPUnit\Framework;
+
+use function dirname;
 
 /**
  * NpmPackagePresetTest.
@@ -35,22 +38,48 @@ use PHPUnit\Framework;
 #[Framework\Attributes\CoversClass(Src\Config\Preset\NpmPackagePreset::class)]
 final class NpmPackagePresetTest extends Framework\TestCase
 {
-    private Src\Config\Preset\NpmPackagePreset $subject;
+    #[Framework\Attributes\Test]
+    #[Framework\Attributes\DataProvider('getConfigThrowsExceptionIfPackageNameCannotBeDeterminedAutomaticallyDataProvider')]
+    public function getConfigThrowsExceptionIfPackageNameCannotBeDeterminedAutomatically(
+        ?Src\Config\VersionBumperConfig $rootConfig,
+        Src\Exception\Exception $expected,
+    ): void {
+        $subject = new Src\Config\Preset\NpmPackagePreset([]);
 
-    public function setUp(): void
-    {
-        $this->subject = new Src\Config\Preset\NpmPackagePreset([
-            'packageName' => '@foo/baz',
-            'path' => 'foo/baz',
-        ]);
+        $this->expectExceptionObject($expected);
+
+        $subject->getConfig($rootConfig);
     }
 
     #[Framework\Attributes\Test]
-    public function constructorThrowsExceptionIfRequiredOptionIsMissing(): void
+    public function getConfigResolvesPackageNameFromManifestFile(): void
     {
-        $this->expectException(Src\Exception\PresetOptionsAreInvalid::class);
+        $rootPath = dirname(__DIR__, 2).'/Fixtures/NpmPackagePreset/valid';
 
-        new Src\Config\Preset\NpmPackagePreset([]);
+        $expected = new Src\Config\VersionBumperConfig(
+            filesToModify: [
+                new Src\Config\FileToModify(
+                    'package.json',
+                    [
+                        new Src\Config\FilePattern('"version": "{%version%}"'),
+                    ],
+                    true,
+                ),
+                new Src\Config\FileToModify(
+                    'package-lock.json',
+                    [
+                        new Src\Config\FilePattern(
+                            '"name": "@foo/baz",\s+"version": "{%version%}"',
+                        ),
+                    ],
+                    true,
+                ),
+            ],
+        );
+
+        $subject = new Src\Config\Preset\NpmPackagePreset([]);
+
+        self::assertEquals($expected, $subject->getConfig(new Src\Config\VersionBumperConfig(rootPath: $rootPath)));
     }
 
     #[Framework\Attributes\Test]
@@ -77,6 +106,52 @@ final class NpmPackagePresetTest extends Framework\TestCase
             ],
         );
 
-        self::assertEquals($expected, $this->subject->getConfig());
+        $subject = new Src\Config\Preset\NpmPackagePreset([
+            'packageName' => '@foo/baz',
+            'path' => 'foo/baz',
+        ]);
+
+        self::assertEquals($expected, $subject->getConfig());
+    }
+
+    /**
+     * @return Generator<string, array{Src\Config\VersionBumperConfig|null, Src\Exception\Exception}>
+     */
+    public static function getConfigThrowsExceptionIfPackageNameCannotBeDeterminedAutomaticallyDataProvider(): Generator
+    {
+        $rootPath = static fn (string $variant) => sprintf(
+            '%s/Fixtures/NpmPackagePreset/invalid--%s',
+            dirname(__DIR__, 2),
+            $variant,
+        );
+
+        yield 'no root config' => [
+            null,
+            new Src\Exception\PackageNameIsMissing('package.json'),
+        ];
+        yield 'root config without root path' => [
+            new Src\Config\VersionBumperConfig(),
+            new Src\Exception\PackageNameIsMissing('package.json'),
+        ];
+        yield 'root config with missing file' => [
+            new Src\Config\VersionBumperConfig(rootPath: '/foo/baz'),
+            new Src\Exception\FileDoesNotExist('/foo/baz/package.json'),
+        ];
+        yield 'root config with malformed JSON' => [
+            new Src\Config\VersionBumperConfig(rootPath: $rootPath('no-json')),
+            new Src\Exception\ManifestFileIsMalformed($rootPath('no-json').'/package.json'),
+        ];
+        yield 'root config with unexpected JSON' => [
+            new Src\Config\VersionBumperConfig(rootPath: $rootPath('no-object')),
+            new Src\Exception\ManifestFileIsMalformed($rootPath('no-object').'/package.json'),
+        ];
+        yield 'root config with missing property' => [
+            new Src\Config\VersionBumperConfig(rootPath: $rootPath('no-name')),
+            new Src\Exception\ManifestFileIsMalformed($rootPath('no-name').'/package.json'),
+        ];
+        yield 'root config with invalid property' => [
+            new Src\Config\VersionBumperConfig(rootPath: $rootPath('no-string')),
+            new Src\Exception\ManifestFileIsMalformed($rootPath('no-string').'/package.json'),
+        ];
     }
 }
