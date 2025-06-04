@@ -83,7 +83,7 @@ final class ConfigReader
         }
 
         foreach ($config->presets() as $preset) {
-            $config = $config->merge($preset->getConfig());
+            $config = $config->merge($preset->getConfig($config));
         }
 
         return $config;

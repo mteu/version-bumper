@@ -36,7 +36,7 @@ use EliasHaeussler\VersionBumper\Enum;
  */
 final class ConventionalCommitsPreset implements Preset
 {
-    public function getConfig(): Config\VersionBumperConfig
+    public function getConfig(?Config\VersionBumperConfig $rootConfig = null): Config\VersionBumperConfig
     {
         $versionRangeIndicators = [
             // Major

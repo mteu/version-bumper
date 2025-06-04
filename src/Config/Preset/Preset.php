@@ -33,7 +33,7 @@ use EliasHaeussler\VersionBumper\Config;
  */
 interface Preset
 {
-    public function getConfig(): Config\VersionBumperConfig;
+    public function getConfig(?Config\VersionBumperConfig $rootConfig = null): Config\VersionBumperConfig;
 
     public static function getIdentifier(): string;
 
