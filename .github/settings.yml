@@ -11,6 +11,7 @@ repository:
   allow_squash_merge: true
   allow_merge_commit: true
   allow_rebase_merge: true
+  allow_auto_merge: true
   delete_branch_on_merge: true
   allow_update_branch: true
   # This will be handled by Renovate
@@ -71,62 +72,133 @@ labels:
     color: '#ffffff'
     description: 'This will not be worked on'
 
-# Branch protection rules
-branches:
-  - name: 'main'
-    protection:
-      required_pull_request_reviews:
-        required_approving_review_count: 1
-        dismiss_stale_reviews: true
-        require_code_owner_reviews: true
-      required_status_checks:
-        strict: true
-        contexts:
-          - 'cgl'
-          - 'Tests (PHP 8.1, Composer 2.2 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.2 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.2 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.2 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.2 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.2 & lowest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.3 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.3 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.3 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.3 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.3 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.3 & lowest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.4 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.4 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.4 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.4 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.4 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.4 & lowest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.5 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.5 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.5 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.5 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.5 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.5 & lowest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.6 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.6 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.6 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.6 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.6 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.6 & lowest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.7 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.7 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.7 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.7 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.7 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.7 & lowest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.8 & highest dependencies)'
-          - 'Tests (PHP 8.1, Composer 2.8 & lowest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.8 & highest dependencies)'
-          - 'Tests (PHP 8.2, Composer 2.8 & lowest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.8 & highest dependencies)'
-          - 'Tests (PHP 8.3, Composer 2.8 & lowest dependencies)'
-          - 'Test coverage'
-          - 'coverage/coveralls'
-      enforce_admins: false
-      required_linear_history: true
-      restrictions: ~
+# Rulesets
+rulesets:
+  - name: CI
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+          - '~DEFAULT_BRANCH'
+        exclude: []
+    rules:
+      - type: deletion
+      - type: non_fast_forward
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: true
+          do_not_enforce_on_create: false
+          required_status_checks:
+            - context: 'cgl'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.2 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.2 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.2 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.2 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.2 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.2 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.3 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.3 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.3 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.3 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.3 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.3 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.4 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.4 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.4 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.4 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.4 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.4 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.4 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.4 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.5 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.5 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.5 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.5 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.5 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.5 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.5 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.5 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.6 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.6 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.6 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.6 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.6 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.6 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.6 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.6 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.7 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.7 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.7 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.7 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.7 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.7 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.7 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.7 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.8 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.1, Composer 2.8 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.8 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.2, Composer 2.8 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.8 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.3, Composer 2.8 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.8 & highest dependencies)'
+              integration_id: 15368
+            - context: 'Tests (PHP 8.4, Composer 2.8 & lowest dependencies)'
+              integration_id: 15368
+            - context: 'Test coverage'
+              integration_id: 15368
+    bypass_actors:
+      - actor_id: 5
+        actor_type: RepositoryRole
+        bypass_mode: always
