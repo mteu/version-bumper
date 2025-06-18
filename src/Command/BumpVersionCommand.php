@@ -95,7 +95,7 @@ final class BumpVersionCommand extends Command\BaseCommand
             'config',
             'c',
             Console\Input\InputOption::VALUE_REQUIRED,
-            'Path to configuration file (JSON or YAML) with files in which to bump new versions',
+            'Path to configuration file (JSON, YAML or PHP) with files in which to bump new versions',
             $this->readConfigFileFromRootPackage(),
         );
         $this->addOption(

@@ -40,7 +40,7 @@ versionRangeIndicators:
 > [!TIP]
 > Have a look at the shipped [JSON schema](../res/version-bumper.schema.json).
 
-### Presets
+## Presets
 
 > [!TIP]
 > Read more about [presets](presets.md).
