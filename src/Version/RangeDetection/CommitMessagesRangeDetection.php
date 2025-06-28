@@ -34,13 +34,13 @@ use function preg_match;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class CommitMessagesRangeDetection implements RangeDetection
+final readonly class CommitMessagesRangeDetection implements RangeDetection
 {
     /**
      * @param list<string> $commitMessages
      */
     public function __construct(
-        private readonly array $commitMessages,
+        private array $commitMessages,
     ) {}
 
     public function matches(Config\VersionRangePattern $pattern): bool

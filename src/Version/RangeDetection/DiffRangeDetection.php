@@ -35,10 +35,10 @@ use function preg_match;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class DiffRangeDetection implements RangeDetection
+final readonly class DiffRangeDetection implements RangeDetection
 {
     public function __construct(
-        private readonly Objects\Diff\Diff $diff,
+        private Objects\Diff\Diff $diff,
     ) {}
 
     public function matches(Config\VersionRangePattern $pattern): bool

@@ -39,10 +39,10 @@ use function in_array;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionReleaser
+final readonly class VersionReleaser
 {
     public function __construct(
-        private readonly ?Command\Caller\CallerInterface $caller = null,
+        private ?Command\Caller\CallerInterface $caller = null,
     ) {}
 
     /**

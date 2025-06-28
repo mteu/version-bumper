@@ -34,7 +34,7 @@ use EliasHaeussler\VersionBumper\Version;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class WriteOperation
+final readonly class WriteOperation
 {
     /**
      * @throws Exception\SourceVersionIsMissing
@@ -42,11 +42,11 @@ final class WriteOperation
      * @throws Exception\VersionBumpResultIsMissing
      */
     public function __construct(
-        private readonly ?Version\Version $source,
-        private readonly ?Version\Version $target,
-        private readonly ?string $result,
-        private readonly Config\FilePattern $pattern,
-        private readonly Enum\OperationState $state,
+        private ?Version\Version $source,
+        private ?Version\Version $target,
+        private ?string $result,
+        private Config\FilePattern $pattern,
+        private Enum\OperationState $state,
     ) {
         $this->validate();
     }

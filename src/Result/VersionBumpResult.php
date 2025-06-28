@@ -35,14 +35,14 @@ use function sprintf;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionBumpResult
+final readonly class VersionBumpResult
 {
     /**
      * @param list<WriteOperation> $operations
      */
     public function __construct(
-        private readonly Config\FileToModify $file,
-        private readonly array $operations,
+        private Config\FileToModify $file,
+        private array $operations,
     ) {}
 
     public function file(): Config\FileToModify

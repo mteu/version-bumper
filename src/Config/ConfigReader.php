@@ -38,10 +38,10 @@ use function is_callable;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class ConfigReader
+final readonly class ConfigReader
 {
-    private readonly Filesystem\Filesystem $filesystem;
-    private readonly Valinor\Mapper\TreeMapper $mapper;
+    private Filesystem\Filesystem $filesystem;
+    private Valinor\Mapper\TreeMapper $mapper;
 
     public function __construct()
     {

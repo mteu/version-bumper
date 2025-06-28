@@ -32,10 +32,10 @@ use EliasHaeussler\VersionBumper\Helper;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class FilePattern
+final readonly class FilePattern
 {
-    private readonly string $original;
-    private readonly string $regularExpression;
+    private string $original;
+    private string $regularExpression;
 
     /**
      * @throws Exception\FilePatternIsInvalid
