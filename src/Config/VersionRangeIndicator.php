@@ -31,15 +31,15 @@ use EliasHaeussler\VersionBumper\Enum;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionRangeIndicator
+final readonly class VersionRangeIndicator
 {
     /**
      * @param list<VersionRangePattern> $patterns
      */
     public function __construct(
-        private readonly Enum\VersionRange $range,
-        private readonly array $patterns,
-        private readonly Enum\VersionRangeIndicatorStrategy $strategy = Enum\VersionRangeIndicatorStrategy::MatchAny,
+        private Enum\VersionRange $range,
+        private array $patterns,
+        private Enum\VersionRangeIndicatorStrategy $strategy = Enum\VersionRangeIndicatorStrategy::MatchAny,
     ) {}
 
     public function range(): Enum\VersionRange

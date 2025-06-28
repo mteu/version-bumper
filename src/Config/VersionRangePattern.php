@@ -31,11 +31,11 @@ use EliasHaeussler\VersionBumper\Enum;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionRangePattern
+final readonly class VersionRangePattern
 {
     public function __construct(
-        private readonly Enum\VersionRangeIndicatorType $type,
-        private readonly string $pattern,
+        private Enum\VersionRangeIndicatorType $type,
+        private string $pattern,
     ) {}
 
     public function type(): Enum\VersionRangeIndicatorType

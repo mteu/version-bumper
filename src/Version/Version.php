@@ -35,14 +35,14 @@ use function preg_match;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class Version implements Stringable
+final readonly class Version implements Stringable
 {
     private const VERSION_PATTERN = '/^v?(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)$/';
 
     public function __construct(
-        private readonly int $major,
-        private readonly int $minor,
-        private readonly int $patch,
+        private int $major,
+        private int $minor,
+        private int $patch,
     ) {}
 
     /**

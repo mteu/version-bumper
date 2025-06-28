@@ -31,16 +31,16 @@ use EliasHaeussler\VersionBumper\Config;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class VersionReleaseResult
+final readonly class VersionReleaseResult
 {
     /**
      * @param list<Config\FileToModify> $committedFiles
      */
     public function __construct(
-        private readonly array $committedFiles,
-        private readonly string $commitMessage,
-        private readonly string $tagName,
-        private readonly ?string $commitId,
+        private array $committedFiles,
+        private string $commitMessage,
+        private string $tagName,
+        private ?string $commitId,
     ) {}
 
     /**

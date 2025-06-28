@@ -35,9 +35,9 @@ use Composer\Plugin;
  *
  * @codeCoverageIgnore
  */
-final class VersionBumperPlugin implements Plugin\PluginInterface, Plugin\Capable, Plugin\Capability\CommandProvider
+final readonly class VersionBumperPlugin implements Plugin\PluginInterface, Plugin\Capable, Plugin\Capability\CommandProvider
 {
-    private readonly ?Composer $composer;
+    private ?Composer $composer;
 
     /**
      * @param array{composer?: Composer} $capabilities

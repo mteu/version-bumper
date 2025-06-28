@@ -32,16 +32,16 @@ use EliasHaeussler\VersionBumper\Helper;
  * @author Elias Häußler <elias@haeussler.dev>
  * @license GPL-3.0-or-later
  */
-final class ReleaseOptions
+final readonly class ReleaseOptions
 {
     /**
      * @throws Exception\TagNameIsInvalid
      */
     public function __construct(
-        private readonly string $commitMessage = 'Release {%version%}',
-        private readonly string $tagName = '{%version%}',
-        private readonly bool $overwriteExistingTag = false,
-        private readonly bool $signTag = false,
+        private string $commitMessage = 'Release {%version%}',
+        private string $tagName = '{%version%}',
+        private bool $overwriteExistingTag = false,
+        private bool $signTag = false,
     ) {
         if (!Helper\VersionHelper::isValidVersionPattern($this->tagName)) {
             throw new Exception\TagNameIsInvalid($this->tagName);
