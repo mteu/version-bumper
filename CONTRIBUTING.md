@@ -20,6 +20,16 @@ cd version-bumper
 composer install
 ```
 
+## Run analyzers
+
+```bash
+# All analyzers
+composer analyze
+
+# Specific analyzers
+composer analyze:dependencies
+```
+
 ## Run linters
 
 ```bash
